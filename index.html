@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FluxBlue - Admin</title>
+    <title>FluxBlue - Painel Administrativo</title>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -30,26 +31,44 @@
             Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
             LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         };
 
         const DB_KEY = 'fluxblue_license_db';
         
         const AdminSystem = {
             init: () => {
-                if (!localStorage.getItem(DB_KEY)) localStorage.setItem(DB_KEY, JSON.stringify({ keys: [], clientData: [] }));
+                if (!localStorage.getItem(DB_KEY)) localStorage.setItem(DB_KEY, JSON.stringify({ keys: [] }));
             },
             getAll: () => JSON.parse(localStorage.getItem(DB_KEY)),
-            generateKey: (durationDays, label) => {
+            generateKey: (durationDays, labelOverride) => {
                 const db = AdminSystem.getAll();
+                // Gera chave no formato FLUX-XXXX-XXXX-XXXX
                 const key = 'FLUX-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Date.now().toString().substr(-4);
+                
                 const now = new Date();
                 const expires = new Date();
                 expires.setDate(now.getDate() + parseInt(durationDays));
 
-                const newLicense = { key, label, duration: durationDays, created: now.toISOString(), expires: expires.toISOString(), assignedEmail: null, status: 'available' };
+                const newLicense = { 
+                    key, 
+                    label: labelOverride, 
+                    duration: durationDays, 
+                    created: now.toISOString(), 
+                    expires: expires.toISOString(), 
+                    assignedEmail: null, 
+                    status: 'available' 
+                };
+                
                 db.keys.push(newLicense);
                 localStorage.setItem(DB_KEY, JSON.stringify(db));
                 return newLicense;
+            },
+            deleteKey: (keyToDelete) => {
+                const db = AdminSystem.getAll();
+                db.keys = db.keys.filter(k => k.key !== keyToDelete);
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+                return db.keys;
             }
         };
 
@@ -65,13 +84,14 @@
             };
 
             return (
-                <div className="min-h-screen flex items-center justify-center p-4">
-                    <form onSubmit={handleLogin} className="bg-slate-800 p-8 rounded-xl border border-slate-700 w-full max-w-sm">
-                        <h2 className="text-2xl font-bold mb-6 text-center text-white">Admin Access</h2>
-                        <input type="email" placeholder="Email" className="w-full bg-slate-900 border border-slate-700 text-white rounded p-3 mb-3" value={email} onChange={e=>setEmail(e.target.value)} />
-                        <input type="password" placeholder="Senha" className="w-full bg-slate-900 border border-slate-700 text-white rounded p-3 mb-4" value={pass} onChange={e=>setPass(e.target.value)} />
-                        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-                        <button className="w-full bg-brand-600 text-white font-bold py-3 rounded hover:bg-brand-700">Entrar</button>
+                <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950">
+                    <form onSubmit={handleLogin} className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-full max-w-sm shadow-2xl">
+                        <h2 className="text-2xl font-bold mb-2 text-center text-white">FluxBlue Admin</h2>
+                        <p className="text-slate-500 text-center mb-6 text-sm">Gerador de Licenças para Venda</p>
+                        <input type="email" placeholder="Email" className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-3 mb-3 outline-none focus:border-brand-500" value={email} onChange={e=>setEmail(e.target.value)} />
+                        <input type="password" placeholder="Senha" className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-3 mb-4 outline-none focus:border-brand-500" value={pass} onChange={e=>setPass(e.target.value)} />
+                        {error && <p className="text-red-400 text-sm mb-4 bg-red-900/20 p-2 rounded border border-red-900/50">{error}</p>}
+                        <button className="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition">Acessar Sistema</button>
                     </form>
                 </div>
             );
@@ -88,9 +108,21 @@
             }, [generatedKey]);
 
             const handleGenerate = () => {
-                const label = duration === '365' ? 'Anual' : duration === '30' ? 'Mensal' : 'Trial 7 Dias';
+                let label = 'Mensal';
+                if (duration === '7') label = 'Teste Grátis (7 Dias)';
+                if (duration === '365') label = 'Plano Anual';
+                if (duration === '36500') label = 'Vitalício (Premium)';
+
                 const key = AdminSystem.generateKey(duration, label);
                 setGeneratedKey(key);
+            };
+
+            const handleDelete = (key) => {
+                if(confirm('Tem certeza? O cliente perderá o acesso.')) {
+                    AdminSystem.deleteKey(key);
+                    const db = AdminSystem.getAll();
+                    setHistory(db.keys.reverse());
+                }
             };
 
             const copyToClipboard = (text) => {
@@ -106,39 +138,64 @@
             };
 
             return (
-                <div className="min-h-screen p-6 md:p-12">
-                    <div className="max-w-4xl mx-auto">
-                        <header className="flex justify-between items-center mb-10 border-b border-slate-700 pb-6">
-                            <h1 className="text-2xl font-bold flex items-center gap-2"><Icons.Shield /> Gerador de Licenças</h1>
-                            <button onClick={onLogout} className="text-sm bg-slate-800 px-4 py-2 rounded text-slate-300 hover:text-white flex gap-2 items-center"><Icons.LogOut /> Sair</button>
+                <div className="min-h-screen p-6 md:p-12 bg-slate-900">
+                    <div className="max-w-5xl mx-auto">
+                        <header className="flex justify-between items-center mb-10 border-b border-slate-800 pb-6">
+                            <div>
+                                <h1 className="text-2xl font-bold flex items-center gap-2 text-white"><Icons.Shield /> Central de Vendas</h1>
+                                <p className="text-slate-400 text-sm">Gerar chaves para novos clientes.</p>
+                            </div>
+                            <button onClick={onLogout} className="text-sm bg-slate-800 px-4 py-2 rounded text-slate-300 hover:text-white flex gap-2 items-center hover:bg-slate-700 transition"><Icons.LogOut /> Sair</button>
                         </header>
                         <div className="grid md:grid-cols-2 gap-8">
-                            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 h-fit">
-                                <h2 className="font-bold mb-4 text-brand-400">Nova Chave</h2>
-                                <select value={duration} onChange={(e) => setDuration(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded p-3 mb-4 outline-none">
-                                    <option value="7">7 Dias (Trial)</option>
-                                    <option value="30">30 Dias (Mensal)</option>
-                                    <option value="365">1 Ano (Anual)</option>
-                                    <option value="3650">10 Anos (Vitalício)</option>
+                            
+                            {/* Gerador */}
+                            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 h-fit shadow-lg">
+                                <h2 className="font-bold mb-4 text-brand-400 uppercase text-xs tracking-wider">Nova Licença</h2>
+                                
+                                <label className="block text-sm text-slate-400 mb-2">Tipo de Plano</label>
+                                <select value={duration} onChange={(e) => setDuration(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded p-3 mb-6 outline-none focus:border-brand-500 text-white">
+                                    <option value="7">Trial (7 Dias)</option>
+                                    <option value="30">Mensal (30 Dias)</option>
+                                    <option value="365">Anual (365 Dias)</option>
+                                    <option value="36500">Vitalício (Acesso Permanente)</option>
                                 </select>
-                                <button onClick={handleGenerate} className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded transition">Gerar Licença</button>
+                                
+                                <button onClick={handleGenerate} className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded transition shadow-lg shadow-brand-900/50">Gerar Chave de Acesso</button>
+                                
                                 {generatedKey && (
-                                    <div className="mt-6 bg-brand-900/30 border border-brand-500/30 p-4 rounded-lg">
-                                        <p className="text-xs text-brand-300 mb-1">Chave Gerada:</p>
+                                    <div className="mt-6 bg-slate-900 border border-brand-500/50 p-4 rounded-lg animate-fade-in">
+                                        <div className="flex justify-between items-end mb-1">
+                                            <p className="text-xs text-brand-400">Chave Gerada:</p>
+                                            <span className="text-xs bg-brand-900 text-brand-200 px-2 py-0.5 rounded">{generatedKey.label}</span>
+                                        </div>
                                         <div className="flex items-center gap-2">
                                             <code className="text-xl font-mono font-bold text-white tracking-widest flex-1">{generatedKey.key}</code>
-                                            <button onClick={() => copyToClipboard(generatedKey.key)} className="text-brand-400 hover:text-white"><Icons.Copy /></button>
+                                            <button onClick={() => copyToClipboard(generatedKey.key)} className="text-slate-400 hover:text-white transition"><Icons.Copy /></button>
                                         </div>
                                     </div>
                                 )}
                             </div>
-                            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                                <h2 className="font-bold mb-4 text-slate-300">Histórico</h2>
-                                <div className="overflow-y-auto max-h-[400px] space-y-3 pr-2">
+
+                            {/* Histórico */}
+                            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                                <h2 className="font-bold mb-4 text-slate-300 uppercase text-xs tracking-wider">Últimas Vendas</h2>
+                                <div className="overflow-y-auto max-h-[500px] space-y-3 pr-2 custom-scrollbar">
+                                    {history.length === 0 && <p className="text-slate-600 text-center py-10">Nenhuma chave gerada ainda.</p>}
                                     {history.map((lic, idx) => (
-                                        <div key={idx} className="bg-slate-900/50 p-3 rounded border border-slate-700/50">
-                                            <div className="flex justify-between font-mono text-sm text-slate-200"><span>{lic.key}</span> <span className={lic.assignedEmail ? 'text-green-400' : 'text-yellow-400'}>{lic.assignedEmail ? 'Ativa' : 'Livre'}</span></div>
-                                            <div className="text-xs text-slate-500 mt-1">{lic.label} • {lic.assignedEmail || 'Sem dono'}</div>
+                                        <div key={idx} className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 hover:border-slate-600 transition group">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="font-mono text-sm text-slate-200 font-bold">{lic.key}</span>
+                                                <button onClick={() => handleDelete(lic.key)} className="text-slate-600 hover:text-red-500 transition opacity-0 group-hover:opacity-100"><Icons.Trash /></button>
+                                            </div>
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className={`px-2 py-0.5 rounded ${lic.label.includes('Vitalício') ? 'bg-purple-900 text-purple-200' : 'bg-blue-900 text-blue-200'}`}>
+                                                    {lic.label}
+                                                </span>
+                                                <span className={lic.assignedEmail ? 'text-green-400' : 'text-yellow-500'}>
+                                                    {lic.assignedEmail ? lic.assignedEmail : 'Aguardando Ativação'}
+                                                </span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
