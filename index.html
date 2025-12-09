@@ -3,216 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FluxBlue - Painel Administrativo</title>
-    
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>FluxBlue - Liberdade Financeira com IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { brand: { 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' } }
-                }
-            }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .gradient-text {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-    </script>
+        .hero-bg {
+            background-image: radial-gradient(circle at center, #eff6ff 0%, #ffffff 70%);
+        }
+        /* Animação de pulso para chamar atenção para o checkout */
+        @keyframes subtle-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .btn-pulse { animation: subtle-pulse 2s infinite; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 antialiased">
-    <div id="root"></div>
+<body class="bg-white text-slate-900">
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const Icons = {
-            Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
-            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            Trash: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        };
+    <!-- NAV -->
+    <nav class="fixed w-full bg-white/80 backdrop-blur-md border-b border-slate-100 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 font-bold text-xl tracking-tight">
+                <i data-lucide="cloud" class="text-blue-600"></i>
+                <span>Flux<span class="text-blue-600">Blue</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#pricing" class="hidden md:block text-sm font-semibold text-slate-600 hover:text-blue-600 transition">Planos</a>
+                <!-- Botão de Login (Para quem já tem conta) -->
+                <a href="client.html" class="bg-slate-100 text-slate-900 px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-200 transition border border-slate-200">
+                    Entrar
+                </a>
+            </div>
+        </div>
+    </nav>
 
-        const DB_KEY = 'fluxblue_license_db';
-        
-        const AdminSystem = {
-            init: () => {
-                if (!localStorage.getItem(DB_KEY)) localStorage.setItem(DB_KEY, JSON.stringify({ keys: [] }));
-            },
-            getAll: () => JSON.parse(localStorage.getItem(DB_KEY)),
-            generateKey: (durationDays, labelOverride) => {
-                const db = AdminSystem.getAll();
-                // Gera chave no formato FLUX-XXXX-XXXX-XXXX
-                const key = 'FLUX-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Date.now().toString().substr(-4);
-                
-                const now = new Date();
-                const expires = new Date();
-                expires.setDate(now.getDate() + parseInt(durationDays));
+    <!-- HERO SECTION -->
+    <header class="pt-32 pb-20 px-4 hero-bg text-center relative overflow-hidden">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold mb-6 border border-blue-100">
+                🚀 A Nova Era do Controle Financeiro
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
+                Pare de ver seu dinheiro <br>
+                <span class="gradient-text">desaparecer todo mês.</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 mb-8 max-w-2xl mx-auto">
+                O único sistema com <strong>Inteligência Artificial</strong> que organiza suas finanças, define metas e te ajuda a sobrar dinheiro, sem planilhas chatas.
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <!-- LINK DE CHECKOUT CAKTO -->
+                <a href="https://pay.cakto.com.br/scbctc9_679715" target="_blank" class="btn-pulse bg-blue-600 text-white text-lg font-bold px-8 py-4 rounded-xl shadow-xl hover:bg-blue-700 transition w-full md:w-auto flex items-center justify-center gap-2">
+                    Quero Assumir o Controle
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+                <p class="text-xs text-slate-400 mt-2 md:mt-0">🔒 Acesso imediato • 30 dias de garantia</p>
+            </div>
+        </div>
 
-                const newLicense = { 
-                    key, 
-                    label: labelOverride, 
-                    duration: durationDays, 
-                    created: now.toISOString(), 
-                    expires: expires.toISOString(), 
-                    assignedEmail: null, 
-                    status: 'available' 
-                };
-                
-                db.keys.push(newLicense);
-                localStorage.setItem(DB_KEY, JSON.stringify(db));
-                return newLicense;
-            },
-            deleteKey: (keyToDelete) => {
-                const db = AdminSystem.getAll();
-                db.keys = db.keys.filter(k => k.key !== keyToDelete);
-                localStorage.setItem(DB_KEY, JSON.stringify(db));
-                return db.keys;
-            }
-        };
-
-        const AdminLogin = ({ onLogin }) => {
-            const [email, setEmail] = useState('');
-            const [pass, setPass] = useState('');
-            const [error, setError] = useState('');
-
-            const handleLogin = (e) => {
-                e.preventDefault();
-                if(email === 'Salatielvitorino45@gmail.com' && pass === 'p1p2p3p4P@') onLogin();
-                else setError('Credenciais inválidas.');
-            };
-
-            return (
-                <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950">
-                    <form onSubmit={handleLogin} className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-full max-w-sm shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-2 text-center text-white">FluxBlue Admin</h2>
-                        <p className="text-slate-500 text-center mb-6 text-sm">Gerador de Licenças para Venda</p>
-                        <input type="email" placeholder="Email" className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-3 mb-3 outline-none focus:border-brand-500" value={email} onChange={e=>setEmail(e.target.value)} />
-                        <input type="password" placeholder="Senha" className="w-full bg-slate-950 border border-slate-700 text-white rounded-lg p-3 mb-4 outline-none focus:border-brand-500" value={pass} onChange={e=>setPass(e.target.value)} />
-                        {error && <p className="text-red-400 text-sm mb-4 bg-red-900/20 p-2 rounded border border-red-900/50">{error}</p>}
-                        <button className="w-full bg-brand-600 text-white font-bold py-3 rounded-lg hover:bg-brand-700 transition">Acessar Sistema</button>
-                    </form>
-                </div>
-            );
-        };
-
-        const Generator = ({ onLogout }) => {
-            const [duration, setDuration] = useState('30');
-            const [generatedKey, setGeneratedKey] = useState(null);
-            const [history, setHistory] = useState([]);
-
-            useEffect(() => { 
-                const db = AdminSystem.getAll();
-                setHistory(db.keys.reverse());
-            }, [generatedKey]);
-
-            const handleGenerate = () => {
-                let label = 'Mensal';
-                if (duration === '7') label = 'Teste Grátis (7 Dias)';
-                if (duration === '365') label = 'Plano Anual';
-                if (duration === '36500') label = 'Vitalício (Premium)';
-
-                const key = AdminSystem.generateKey(duration, label);
-                setGeneratedKey(key);
-            };
-
-            const handleDelete = (key) => {
-                if(confirm('Tem certeza? O cliente perderá o acesso.')) {
-                    AdminSystem.deleteKey(key);
-                    const db = AdminSystem.getAll();
-                    setHistory(db.keys.reverse());
-                }
-            };
-
-            const copyToClipboard = (text) => {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                textArea.style.left = "-999999px";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try { document.execCommand('copy'); alert('Chave copiada!'); } catch (err) { prompt("Copie:", text); }
-                document.body.removeChild(textArea);
-            };
-
-            return (
-                <div className="min-h-screen p-6 md:p-12 bg-slate-900">
-                    <div className="max-w-5xl mx-auto">
-                        <header className="flex justify-between items-center mb-10 border-b border-slate-800 pb-6">
-                            <div>
-                                <h1 className="text-2xl font-bold flex items-center gap-2 text-white"><Icons.Shield /> Central de Vendas</h1>
-                                <p className="text-slate-400 text-sm">Gerar chaves para novos clientes.</p>
-                            </div>
-                            <button onClick={onLogout} className="text-sm bg-slate-800 px-4 py-2 rounded text-slate-300 hover:text-white flex gap-2 items-center hover:bg-slate-700 transition"><Icons.LogOut /> Sair</button>
-                        </header>
-                        <div className="grid md:grid-cols-2 gap-8">
-                            
-                            {/* Gerador */}
-                            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 h-fit shadow-lg">
-                                <h2 className="font-bold mb-4 text-brand-400 uppercase text-xs tracking-wider">Nova Licença</h2>
-                                
-                                <label className="block text-sm text-slate-400 mb-2">Tipo de Plano</label>
-                                <select value={duration} onChange={(e) => setDuration(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded p-3 mb-6 outline-none focus:border-brand-500 text-white">
-                                    <option value="7">Trial (7 Dias)</option>
-                                    <option value="30">Mensal (30 Dias)</option>
-                                    <option value="365">Anual (365 Dias)</option>
-                                    <option value="36500">Vitalício (Acesso Permanente)</option>
-                                </select>
-                                
-                                <button onClick={handleGenerate} className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded transition shadow-lg shadow-brand-900/50">Gerar Chave de Acesso</button>
-                                
-                                {generatedKey && (
-                                    <div className="mt-6 bg-slate-900 border border-brand-500/50 p-4 rounded-lg animate-fade-in">
-                                        <div className="flex justify-between items-end mb-1">
-                                            <p className="text-xs text-brand-400">Chave Gerada:</p>
-                                            <span className="text-xs bg-brand-900 text-brand-200 px-2 py-0.5 rounded">{generatedKey.label}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <code className="text-xl font-mono font-bold text-white tracking-widest flex-1">{generatedKey.key}</code>
-                                            <button onClick={() => copyToClipboard(generatedKey.key)} className="text-slate-400 hover:text-white transition"><Icons.Copy /></button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Histórico */}
-                            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
-                                <h2 className="font-bold mb-4 text-slate-300 uppercase text-xs tracking-wider">Últimas Vendas</h2>
-                                <div className="overflow-y-auto max-h-[500px] space-y-3 pr-2 custom-scrollbar">
-                                    {history.length === 0 && <p className="text-slate-600 text-center py-10">Nenhuma chave gerada ainda.</p>}
-                                    {history.map((lic, idx) => (
-                                        <div key={idx} className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 hover:border-slate-600 transition group">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="font-mono text-sm text-slate-200 font-bold">{lic.key}</span>
-                                                <button onClick={() => handleDelete(lic.key)} className="text-slate-600 hover:text-red-500 transition opacity-0 group-hover:opacity-100"><Icons.Trash /></button>
-                                            </div>
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className={`px-2 py-0.5 rounded ${lic.label.includes('Vitalício') ? 'bg-purple-900 text-purple-200' : 'bg-blue-900 text-blue-200'}`}>
-                                                    {lic.label}
-                                                </span>
-                                                <span className={lic.assignedEmail ? 'text-green-400' : 'text-yellow-500'}>
-                                                    {lic.assignedEmail ? lic.assignedEmail : 'Aguardando Ativação'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+        <!-- Mockup Visual -->
+        <div class="mt-16 max-w-5xl mx-auto relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20"></div>
+            <div class="relative bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-800">
+                <!-- Representação simples da Interface -->
+                <div class="bg-slate-50 rounded-xl overflow-hidden aspect-[16/9] flex items-center justify-center relative">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80" class="object-cover opacity-90 w-full h-full" alt="Dashboard Financeiro">
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-[2px]">
+                        <div class="bg-white p-6 rounded-2xl shadow-xl text-center animate-bounce">
+                            <i data-lucide="bot" class="w-12 h-12 text-blue-600 mx-auto mb-2"></i>
+                            <p class="font-bold text-slate-800">"Você gastou R$ 150 a menos<br>que o mês passado! Parabéns."</p>
                         </div>
                     </div>
                 </div>
-            );
-        };
+            </div>
+        </div>
+    </header>
 
-        const AdminApp = () => {
-            const [auth, setAuth] = useState(false);
-            useEffect(() => AdminSystem.init(), []);
-            return auth ? <Generator onLogout={() => setAuth(false)} /> : <AdminLogin onLogin={() => setAuth(true)} />;
-        };
+    <!-- PROBLEM AGITATION -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-16 text-slate-800">Você se identifica com isso?</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 rounded-2xl bg-red-50 border border-red-100 hover:shadow-lg transition">
+                    <i data-lucide="frown" class="w-10 h-10 text-red-500 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">O "Mistério" do Saldo</h3>
+                    <p class="text-slate-600 text-sm">Você recebe o salário, paga as contas e, 10 dias depois, não faz ideia de onde foi parar o resto do dinheiro.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-orange-50 border border-orange-100 hover:shadow-lg transition">
+                    <i data-lucide="file-spreadsheet" class="w-10 h-10 text-orange-500 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">Preguiça de Planilhas</h3>
+                    <p class="text-slate-600 text-sm">Você já tentou Excel, caderninho, apps complexos... mas desiste depois de 3 dias porque é chato demais.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition">
+                    <i data-lucide="lock" class="w-10 h-10 text-slate-500 mb-4"></i>
+                    <h3 class="font-bold text-lg mb-2">Medo do Futuro</h3>
+                    <p class="text-slate-600 text-sm">Sem reservas, qualquer imprevisto (carro quebra, remédio) vira uma bola de neve de dívidas no cartão.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<AdminApp />);
+    <!-- SOLUTION / FEATURES -->
+    <section class="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <span class="text-blue-400 font-bold tracking-widest text-xs uppercase">A Solução Definitiva</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2">Por que o FluxBlue é diferente?</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <div class="flex gap-4">
+                        <div class="bg-blue-600/20 p-3 rounded-lg h-fit text-blue-400"><i data-lucide="bot"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Consultor Financeiro via IA</h3>
+                            <p class="text-slate-400">Converse com nossa IA como se fosse um amigo. Pergunte "Quanto gastei com Uber?" e receba a resposta na hora.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="bg-green-600/20 p-3 rounded-lg h-fit text-green-400"><i data-lucide="cloud"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Tecnologia Google Cloud</h3>
+                            <p class="text-slate-400">Seus dados salvos em nuvem segura. Acesse pelo computador, celular ou tablet. Se trocar de celular, seus dados continuam lá.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="bg-purple-600/20 p-3 rounded-lg h-fit text-purple-400"><i data-lucide="target"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Metas Visuais</h3>
+                            <p class="text-slate-400">Crie "caixinhas" para seus sonhos (Viagem, Carro, Casa). Acompanhe o progresso visualmente e se motive.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
+                    <!-- Mockup Card -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-sm text-slate-400 border-b border-slate-700 pb-2">
+                            <span>Resumo do Mês</span>
+                            <span class="text-green-400 font-bold">+ R$ 850,00</span>
+                        </div>
+                        <div class="bg-slate-700/50 rounded-lg p-3 flex items-center gap-3">
+                            <div class="bg-red-500/20 p-2 rounded text-red-400"><i data-lucide="shopping-cart" size="16"></i></div>
+                            <div class="flex-1">
+                                <div class="h-2 bg-slate-600 rounded w-1/2 mb-1"></div>
+                                <div class="h-2 bg-slate-600 rounded w-1/4"></div>
+                            </div>
+                            <span class="text-red-400 font-mono text-sm">-R$ 200</span>
+                        </div>
+                        <div class="bg-slate-700/50 rounded-lg p-3 flex items-center gap-3">
+                            <div class="bg-blue-500/20 p-2 rounded text-blue-400"><i data-lucide="bot" size="16"></i></div>
+                            <p class="text-xs text-slate-300 italic">"Você já economizou 15% a mais que no mês passado. Mantenha o foco!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SOCIAL PROOF -->
+    <section class="py-20 bg-blue-50">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold mb-10 text-slate-800">Quem usa, recomenda</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm text-left">
+                    <div class="flex gap-1 text-yellow-400 mb-2">
+                        <i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">"Eu nunca conseguia guardar dinheiro. Com o sistema de Metas do FluxBlue, finalmente consegui juntar a entrada do meu carro. A IA ajuda demais!"</p>
+                    <p class="font-bold text-slate-900 text-xs">— Ricardo M., Designer</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm text-left">
+                    <div class="flex gap-1 text-yellow-400 mb-2">
+                        <i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4">"Simples, direto e bonito. Funciona no meu celular e no PC do trabalho. O suporte é incrível e o preço é ridículo de barato."</p>
+                    <p class="font-bold text-slate-900 text-xs">— Ana Paula, Médica Veterinária</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING / OFFER -->
+    <section id="pricing" class="py-20 px-4">
+        <div class="max-w-lg mx-auto">
+            <div class="bg-white rounded-3xl shadow-2xl border-2 border-blue-600 overflow-hidden relative">
+                <!-- Badge -->
+                <div class="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                    OFERTA ESPECIAL
+                </div>
+
+                <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
+                    <h3 class="text-slate-500 font-bold uppercase tracking-widest text-sm mb-2">Assinatura Mensal</h3>
+                    <div class="flex justify-center items-end gap-2 mb-2">
+                        <span class="text-slate-400 text-lg line-through">R$ 49,90</span>
+                    </div>
+                    <div class="flex justify-center items-baseline gap-1">
+                        <span class="text-2xl font-bold text-slate-700">R$</span>
+                        <span class="text-6xl font-black text-blue-600">29,90</span>
+                        <span class="text-slate-500 font-medium">/mês</span>
+                    </div>
+                    <p class="text-green-600 text-xs font-bold mt-2 bg-green-100 inline-block px-2 py-1 rounded">Menos de R$ 1,00 por dia</p>
+                </div>
+
+                <div class="p-8">
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3 text-slate-600">
+                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                            <span>Acesso Ilimitado ao Sistema</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-600">
+                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                            <span>Inteligência Artificial Integrada</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-600">
+                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                            <span>Armazenamento Seguro em Nuvem</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-slate-600">
+                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                            <span>Atualizações Gratuitas</span>
+                        </li>
+                    </ul>
+
+                    <!-- LINK DE CHECKOUT CAKTO -->
+                    <a href="https://pay.cakto.com.br/scbctc9_679715" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1 text-center flex items-center justify-center gap-2">
+                        ACESSAR SISTEMA AGORA
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </a>
+                    
+                    <p class="text-center text-xs text-slate-400 mt-4 flex items-center justify-center gap-1">
+                        <i data-lucide="lock" class="w-3 h-3"></i> Pagamento Seguro • Acesso Imediato
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-2xl mx-auto px-4">
+            <h2 class="text-2xl font-bold text-center mb-10 text-slate-800">Dúvidas Frequentes</h2>
+            <div class="space-y-4">
+                <details class="bg-white p-4 rounded-lg shadow-sm cursor-pointer group">
+                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                        Funciona no celular?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                    </summary>
+                    <p class="text-slate-600 mt-3 text-sm">Sim! O FluxBlue é um Web App moderno. Funciona perfeitamente no iPhone, Android, Tablet e Computador, sem precisar baixar nada na loja de aplicativos.</p>
+                </details>
+                <details class="bg-white p-4 rounded-lg shadow-sm cursor-pointer group">
+                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                        Meus dados estão seguros?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                    </summary>
+                    <p class="text-slate-600 mt-3 text-sm">Absolutamente. Utilizamos a infraestrutura do Google Firebase (a mesma usada por grandes empresas) para criptografar e salvar seus dados na nuvem.</p>
+                </details>
+                <details class="bg-white p-4 rounded-lg shadow-sm cursor-pointer group">
+                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
+                        Como acesso o sistema?
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
+                    </summary>
+                    <p class="text-slate-600 mt-3 text-sm">Assim que você tiver sua conta, basta clicar em "Entrar" no topo desta página. Se você ainda não tem conta, solicite ao administrador.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center text-sm">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-center gap-2 font-bold text-xl tracking-tight text-white mb-4">
+                <i data-lucide="cloud" class="text-blue-600"></i>
+                <span>Flux<span class="text-blue-600">Blue</span></span>
+            </div>
+            <p class="mb-4">Seu controle financeiro definitivo.</p>
+            <div class="flex justify-center gap-4 mb-8">
+                <a href="#" class="hover:text-white transition">Termos de Uso</a>
+                <a href="#" class="hover:text-white transition">Privacidade</a>
+                <a href="#" class="hover:text-white transition">Contato</a>
+            </div>
+            <p>&copy; 2024 FluxBlue Inc. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Inicializa ícones
+        lucide.createIcons();
     </script>
 </body>
 </html>
