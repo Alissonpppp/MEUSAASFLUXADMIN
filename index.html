@@ -7,6 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Facebook Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    // Substitua 'SEU_ID_DO_PIXEL' pelo ID numérico do seu Pixel do Facebook
+    fbq('init', 'SEU_ID_DO_PIXEL'); 
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=SEU_ID_DO_PIXEL&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Facebook Pixel Code -->
+
     <style>
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .gradient-text {
@@ -60,8 +81,11 @@
             </p>
             
             <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-                <!-- LINK DE CHECKOUT CAKTO -->
-                <a href="https://pay.cakto.com.br/scbctc9_679715" target="_blank" class="btn-pulse bg-blue-600 text-white text-lg font-bold px-8 py-4 rounded-xl shadow-xl hover:bg-blue-700 transition w-full md:w-auto flex items-center justify-center gap-2">
+                <!-- LINK DE CHECKOUT CAKTO COM PIXEL -->
+                <a href="https://pay.cakto.com.br/scbctc9_679715" 
+                   target="_blank" 
+                   onclick="fbq('track', 'AddToCart');"
+                   class="btn-pulse bg-blue-600 text-white text-lg font-bold px-8 py-4 rounded-xl shadow-xl hover:bg-blue-700 transition w-full md:w-auto flex items-center justify-center gap-2">
                     Quero Assumir o Controle
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
@@ -237,8 +261,11 @@
                         </li>
                     </ul>
 
-                    <!-- LINK DE CHECKOUT CAKTO -->
-                    <a href="https://pay.cakto.com.br/scbctc9_679715" target="_blank" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1 text-center flex items-center justify-center gap-2">
+                    <!-- LINK DE CHECKOUT CAKTO COM PIXEL -->
+                    <a href="https://pay.cakto.com.br/scbctc9_679715" 
+                       target="_blank" 
+                       onclick="fbq('track', 'AddToCart');"
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1 text-center flex items-center justify-center gap-2">
                         ACESSAR SISTEMA AGORA
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>
