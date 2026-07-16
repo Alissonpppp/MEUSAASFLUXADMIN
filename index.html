@@ -3,325 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FluxBlue - Liberdade Financeira com IA</title>
+    <title>FluxBlue - Painel Administrativo</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- TikTok Pixel Code Start -->
-    <script>
-    !function (w, d, t) {
-      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
-      var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
-      ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-
-      ttq.load('CK92IFRC77UDMU34NK4G');
-      ttq.page();
-    }(window, document, 'ttq');
+        window.FirebaseSDK = {
+            initializeApp,
+            auth: { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup },
+            firestore: { getFirestore, doc, setDoc, collection, getDocs, updateDoc, deleteDoc }
+        };
+        window.dispatchEvent(new Event('firebase-ready'));
     </script>
-    <!-- TikTok Pixel Code End -->
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { 
+                        brand: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+                        slate: { 850: '#1a2234', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
-        .gradient-text {
-            background: linear-gradient(to right, #2563eb, #9333ea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-bg {
-            background-image: radial-gradient(circle at center, #eff6ff 0%, #ffffff 70%);
-        }
-        /* Animação de pulso para chamar atenção para o checkout */
-        @keyframes subtle-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
-            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-        }
-        .btn-pulse { animation: subtle-pulse 2s infinite; }
+        body { background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .loader { border: 3px solid #1e293b; border-top: 3px solid #6366f1; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-white text-slate-900">
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+    <div id="root"><div class="h-screen flex items-center justify-center"><div class="loader"></div></div></div>
 
-    <!-- NAV -->
-    <nav class="fixed w-full bg-white/80 backdrop-blur-md border-b border-slate-100 z-50">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 font-bold text-xl tracking-tight">
-                <i data-lucide="cloud" class="text-blue-600"></i>
-                <span>Flux<span class="text-blue-600">Blue</span></span>
-            </div>
-            <div class="flex items-center gap-4">
-                <a href="#pricing" class="hidden md:block text-sm font-semibold text-slate-600 hover:text-blue-600 transition">Planos</a>
-                <!-- Botão de Login (Para quem já tem conta) -->
-                <a href="client.html" class="bg-slate-100 text-slate-900 px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-200 transition border border-slate-200">
-                    Entrar
-                </a>
-            </div>
-        </div>
-    </nav>
+    <script type="text/babel">
+        function startAdminApp() {
+            const { initializeApp } = window.FirebaseSDK;
+            const { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } = window.FirebaseSDK.auth;
+            const { getFirestore, doc, setDoc, collection, getDocs, updateDoc, deleteDoc } = window.FirebaseSDK.firestore;
 
-    <!-- HERO SECTION -->
-    <header class="pt-32 pb-20 px-4 hero-bg text-center relative overflow-hidden">
-        <div class="max-w-4xl mx-auto relative z-10">
-            <div class="inline-block px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold mb-6 border border-blue-100">
-                🚀 A Nova Era do Controle Financeiro
-            </div>
-            <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
-                Pare de ver seu dinheiro <br>
-                <span class="gradient-text">desaparecer todo mês.</span>
-            </h1>
-            <p class="text-lg md:text-xl text-slate-500 mb-8 max-w-2xl mx-auto">
-                O único sistema com <strong>Inteligência Artificial</strong> que organiza suas finanças, define metas e te ajuda a sobrar dinheiro, sem planilhas chatas.
-            </p>
-            
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-                <!-- LINK DE CHECKOUT CAKTO COM PIXEL TIKTOK -->
-                <a href="https://pay.cakto.com.br/scbctc9_679715" 
-                   target="_blank" 
-                   onclick="ttq.track('AddToCart');"
-                   class="btn-pulse bg-blue-600 text-white text-lg font-bold px-8 py-4 rounded-xl shadow-xl hover:bg-blue-700 transition w-full md:w-auto flex items-center justify-center gap-2">
-                    Quero Assumir o Controle
-                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                </a>
-                <p class="text-xs text-slate-400 mt-2 md:mt-0">🔒 Acesso imediato • 30 dias de garantia</p>
-            </div>
-        </div>
+            // MESMA CONFIGURAÇÃO DE BANCO DE DADOS DO APP PRINCIPAL
+            const firebaseConfig = {
+                apiKey: "AIzaSyB5I6RG-FicgOThwhl-1LLWySo3JRjK1YI",
+                authDomain: "bompre-8a7c0.firebaseapp.com",
+                projectId: "bompre-8a7c0",
+                storageBucket: "bompre-8a7c0.firebasestorage.app",
+                messagingSenderId: "390830730249",
+                appId: "1:390830730249:web:106a313c6d2bae02ec5cd8"
+            };
 
-        <!-- Mockup Visual -->
-        <div class="mt-16 max-w-5xl mx-auto relative">
-            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20"></div>
-            <div class="relative bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-800">
-                <!-- Representação simples da Interface -->
-                <div class="bg-slate-50 rounded-xl overflow-hidden aspect-[16/9] flex items-center justify-center relative">
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80" class="object-cover opacity-90 w-full h-full" alt="Dashboard Financeiro">
-                    <div class="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-[2px]">
-                        <div class="bg-white p-6 rounded-2xl shadow-xl text-center animate-bounce">
-                            <i data-lucide="bot" class="w-12 h-12 text-blue-600 mx-auto mb-2"></i>
-                            <p class="font-bold text-slate-800">"Você gastou R$ 150 a menos<br>que o mês passado! Parabéns."</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const appId = 'fluxblue-prod-v6';
+            const { useState, useEffect } = React;
 
-    <!-- PROBLEM AGITATION -->
-    <section class="py-20 bg-white">
-        <div class="max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-16 text-slate-800">Você se identifica com isso?</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="p-6 rounded-2xl bg-red-50 border border-red-100 hover:shadow-lg transition">
-                    <i data-lucide="frown" class="w-10 h-10 text-red-500 mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">O "Mistério" do Saldo</h3>
-                    <p class="text-slate-600 text-sm">Você recebe o salário, paga as contas e, 10 dias depois, não faz ideia de onde foi parar o resto do dinheiro.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-orange-50 border border-orange-100 hover:shadow-lg transition">
-                    <i data-lucide="file-spreadsheet" class="w-10 h-10 text-orange-500 mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">Preguiça de Planilhas</h3>
-                    <p class="text-slate-600 text-sm">Você já tentou Excel, caderninho, apps complexos... mas desiste depois de 3 dias porque é chato demais.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition">
-                    <i data-lucide="lock" class="w-10 h-10 text-slate-500 mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">Medo do Futuro</h3>
-                    <p class="text-slate-600 text-sm">Sem reservas, qualquer imprevisto (carro quebra, remédio) vira uma bola de neve de dívidas no cartão.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+            const AdminLogin = () => {
+                const [email, setEmail] = useState(''); 
+                const [password, setPassword] = useState('');
+                const [error, setError] = useState('');
+                const [loading, setLoading] = useState(false);
 
-    <!-- SOLUTION / FEATURES -->
-    <section class="py-20 bg-slate-900 text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+                const handleLogin = async (e) => {
+                    e.preventDefault();
+                    setError('');
+                    setLoading(true);
+                    try { 
+                        await signInWithEmailAndPassword(auth, email, password); 
+                    } catch (err) { 
+                        setError("Acesso negado. Verifique suas credenciais."); 
+                        setLoading(false);
+                    }
+                };
 
-        <div class="max-w-6xl mx-auto px-4 relative z-10">
-            <div class="text-center mb-16">
-                <span class="text-blue-400 font-bold tracking-widest text-xs uppercase">A Solução Definitiva</span>
-                <h2 class="text-3xl md:text-4xl font-bold mt-2">Por que o FluxBlue é diferente?</h2>
-            </div>
+                const handleGoogleLogin = async () => {
+                    setError('');
+                    setLoading(true);
+                    try {
+                        await signInWithPopup(auth, new GoogleAuthProvider());
+                    } catch (err) {
+                        setError("Erro ao autenticar com Google: " + err.message);
+                        setLoading(false);
+                    }
+                };
 
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="space-y-8">
-                    <div class="flex gap-4">
-                        <div class="bg-blue-600/20 p-3 rounded-lg h-fit text-blue-400"><i data-lucide="bot"></i></div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-1">Consultor Financeiro via IA</h3>
-                            <p class="text-slate-400">Converse com nossa IA como se fosse um amigo. Pergunte "Quanto gastei com Uber?" e receba a resposta na hora.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="bg-green-600/20 p-3 rounded-lg h-fit text-green-400"><i data-lucide="cloud"></i></div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-1">Tecnologia Google Cloud</h3>
-                            <p class="text-slate-400">Seus dados salvos em nuvem segura. Acesse pelo computador, celular ou tablet. Se trocar de celular, seus dados continuam lá.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="bg-purple-600/20 p-3 rounded-lg h-fit text-purple-400"><i data-lucide="target"></i></div>
-                        <div>
-                            <h3 class="text-xl font-bold mb-1">Metas Visuais</h3>
-                            <p class="text-slate-400">Crie "caixinhas" para seus sonhos (Viagem, Carro, Casa). Acompanhe o progresso visualmente e se motive.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-2xl transform rotate-2 hover:rotate-0 transition duration-500">
-                    <!-- Mockup Card -->
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between text-sm text-slate-400 border-b border-slate-700 pb-2">
-                            <span>Resumo do Mês</span>
-                            <span class="text-green-400 font-bold">+ R$ 850,00</span>
-                        </div>
-                        <div class="bg-slate-700/50 rounded-lg p-3 flex items-center gap-3">
-                            <div class="bg-red-500/20 p-2 rounded text-red-400"><i data-lucide="shopping-cart" size="16"></i></div>
-                            <div class="flex-1">
-                                <div class="h-2 bg-slate-600 rounded w-1/2 mb-1"></div>
-                                <div class="h-2 bg-slate-600 rounded w-1/4"></div>
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="bg-slate-800 p-8 rounded-3xl max-w-md w-full border border-slate-700 shadow-2xl">
+                            <div className="text-center mb-6">
+                                <div className="w-12 h-12 bg-brand-500/20 text-brand-500 rounded-2xl flex items-center justify-center font-black text-xl mx-auto mb-3">⚡</div>
+                                <h1 className="text-2xl font-extrabold text-white">Painel do Admin</h1>
+                                <p className="text-slate-400 text-xs mt-1">Acesso restrito ao gestor do sistema</p>
                             </div>
-                            <span class="text-red-400 font-mono text-sm">-R$ 200</span>
+                            {error && <div className="bg-rose-500/20 border border-rose-500/30 text-rose-300 p-3 rounded-xl mb-4 text-xs font-semibold">{error}</div>}
+                            <form onSubmit={handleLogin} className="space-y-4">
+                                <input type="email" placeholder="E-mail de Administrador" required className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-brand-500" value={email} onChange={e=>setEmail(e.target.value)} />
+                                <input type="password" placeholder="Senha" required className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-brand-500" value={password} onChange={e=>setPassword(e.target.value)} />
+                                <button disabled={loading} className="w-full bg-brand-600 hover:bg-brand-500 font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-brand-600/30">{loading ? 'Acessando...' : 'Acessar Painel'}</button>
+                            </form>
+                            <div className="relative my-6"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700"></div></div><div className="relative flex justify-center text-[10px] uppercase"><span className="bg-slate-800 px-3 text-slate-500 font-bold tracking-wider">Ou</span></div></div>
+                            <button onClick={handleGoogleLogin} disabled={loading} className="w-full bg-slate-700 hover:bg-slate-600 py-3.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
+                                Entrar com Google
+                            </button>
                         </div>
-                        <div class="bg-slate-700/50 rounded-lg p-3 flex items-center gap-3">
-                            <div class="bg-blue-500/20 p-2 rounded text-blue-400"><i data-lucide="bot" size="16"></i></div>
-                            <p class="text-xs text-slate-300 italic">"Você já economizou 15% a mais que no mês passado. Mantenha o foco!"</p>
-                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
+                );
+            };
 
-    <!-- SOCIAL PROOF -->
-    <section class="py-20 bg-blue-50">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-2xl font-bold mb-10 text-slate-800">Quem usa, recomenda</h2>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm text-left">
-                    <div class="flex gap-1 text-yellow-400 mb-2">
-                        <i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i>
+            const DashboardAdmin = ({ user }) => {
+                const [users, setUsers] = useState([]);
+                const [loading, setLoading] = useState(true);
+                const [searchTerm, setSearchTerm] = useState('');
+
+                const fetchUsers = async () => {
+                    setLoading(true);
+                    try {
+                        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public_users'));
+                        const list = querySnapshot.docs.map(d => {
+                            const data = d.data();
+                            const expires = data.expiresAt ? new Date(data.expiresAt) : new Date(0);
+                            const isExpired = new Date() > expires;
+                            return { id: d.id, ...data, isExpired };
+                        });
+                        setUsers(list);
+                    } catch (e) {
+                        console.error("Erro ao buscar usuários:", e);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                useEffect(() => { fetchUsers(); }, []);
+
+                const toggleStatus = async (uid, active, extend = false) => {
+                    try {
+                        let updates = { active };
+                        if (extend) {
+                            const nextMonth = new Date(); 
+                            nextMonth.setDate(nextMonth.getDate() + 30);
+                            updates.expiresAt = nextMonth.toISOString();
+                        } else if (!active) {
+                            const yesterday = new Date(); 
+                            yesterday.setDate(yesterday.getDate() - 1);
+                            updates.expiresAt = yesterday.toISOString();
+                        }
+                        
+                        await updateDoc(doc(db, 'artifacts', appId, 'public_users', uid), updates);
+                        await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'data', 'finance'), { 
+                            subscription: { active, expiresAt: updates.expiresAt } 
+                        }, { merge: true });
+                        
+                        fetchUsers();
+                        alert(active ? 'Assinatura renovada por +30 dias com sucesso!' : 'Acesso revogado!');
+                    } catch (e) {
+                        alert("Erro ao atualizar status: " + e.message);
+                    }
+                };
+
+                const deleteUserDoc = async (uid) => {
+                    if(!confirm('ATENÇÃO: Excluir este usuário apagará todo o registro financeiro dele no banco de dados. Deseja continuar?')) return;
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public_users', uid));
+                        await deleteDoc(doc(db, 'artifacts', appId, 'users', uid, 'data', 'finance'));
+                        fetchUsers();
+                    } catch (e) {
+                        alert("Erro ao excluir usuário: " + e.message);
+                    }
+                };
+
+                const filteredUsers = users.filter(u => 
+                    (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (u.id && u.id.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+
+                return (
+                    <div className="max-w-6xl mx-auto p-4 md:p-8">
+                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-slate-800 gap-4">
+                            <div>
+                                <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
+                                    <span>Gestão de Clientes</span>
+                                    <span className="text-xs bg-brand-500/20 text-brand-400 border border-brand-500/30 px-2.5 py-0.5 rounded-full font-bold">{users.length} total</span>
+                                </h1>
+                                <p className="text-slate-400 text-xs mt-1">Administrador conectado: <strong className="text-slate-200">{user.email}</strong></p>
+                            </div>
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar por e-mail ou ID..." 
+                                    className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 flex-1 md:w-64"
+                                    value={searchTerm}
+                                    onChange={e=>setSearchTerm(e.target.value)}
+                                />
+                                <button onClick={()=>signOut(auth)} className="bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition">Sair</button>
+                            </div>
+                        </header>
+
+                        {loading ? (
+                            <div className="text-center py-20"><div className="loader mx-auto mb-3"></div><p className="text-slate-400 text-xs font-semibold">Carregando base de usuários...</p></div>
+                        ) : (
+                            <div className="grid gap-3">
+                                {filteredUsers.map(u => (
+                                    <div key={u.id} className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 hover:border-slate-600 transition">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <span className="font-extrabold text-base text-white truncate">{u.email || 'Usuário sem e-mail'}</span>
+                                                {u.isExpired || !u.active ? (
+                                                    <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded-md font-extrabold uppercase tracking-wider">Vencido / Bloqueado</span>
+                                                ) : (
+                                                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded-md font-extrabold uppercase tracking-wider">Ativo</span>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+                                                <p className="font-mono text-[11px] select-all cursor-pointer hover:text-slate-300" title="Clique para copiar" onClick={()=>{navigator.clipboard.writeText(u.id); alert('ID copiado!');}}>ID: {u.id}</p>
+                                                <span>•</span>
+                                                <span>Expira em: <strong className="text-slate-300">{u.expiresAt ? new Date(u.expiresAt).toLocaleDateString('pt-BR') : 'N/A'}</strong></span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                                            <button onClick={()=>toggleStatus(u.id, true, true)} className="flex-1 lg:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-md shadow-emerald-600/20">
+                                                +30 Dias (Aprovar)
+                                            </button>
+                                            <button onClick={()=>toggleStatus(u.id, false, false)} className="flex-1 lg:flex-none bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition">
+                                                Bloquear Acesso
+                                            </button>
+                                            <button onClick={()=>deleteUserDoc(u.id)} className="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center" title="Excluir Usuário">
+                                                Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {filteredUsers.length === 0 && (
+                                    <div className="text-center py-16 bg-slate-800/40 rounded-3xl border border-slate-800 text-slate-500 text-xs">
+                                        Nenhum usuário encontrado na busca.
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
-                    <p class="text-slate-600 text-sm mb-4">"Eu nunca conseguia guardar dinheiro. Com o sistema de Metas do FluxBlue, finalmente consegui juntar a entrada do meu carro. A IA ajuda demais!"</p>
-                    <p class="font-bold text-slate-900 text-xs">— Ricardo M., Designer</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm text-left">
-                    <div class="flex gap-1 text-yellow-400 mb-2">
-                        <i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i><i data-lucide="star" class="fill-current w-4"></i>
-                    </div>
-                    <p class="text-slate-600 text-sm mb-4">"Simples, direto e bonito. Funciona no meu celular e no PC do trabalho. O suporte é incrível e o preço é ridículo de barato."</p>
-                    <p class="font-bold text-slate-900 text-xs">— Ana Paula, Médica Veterinária</p>
-                </div>
-            </div>
-        </div>
-    </section>
+                );
+            };
 
-    <!-- PRICING / OFFER -->
-    <section id="pricing" class="py-20 px-4">
-        <div class="max-w-lg mx-auto">
-            <div class="bg-white rounded-3xl shadow-2xl border-2 border-blue-600 overflow-hidden relative">
-                <!-- Badge -->
-                <div class="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    OFERTA ESPECIAL
-                </div>
+            const Root = () => {
+                const [user, setUser] = useState(null); 
+                const [loading, setLoading] = useState(true);
 
-                <div class="p-8 text-center bg-slate-50 border-b border-slate-100">
-                    <h3 class="text-slate-500 font-bold uppercase tracking-widest text-sm mb-2">Assinatura Mensal</h3>
-                    <div class="flex justify-center items-end gap-2 mb-2">
-                        <span class="text-slate-400 text-lg line-through">R$ 49,90</span>
-                    </div>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <span class="text-2xl font-bold text-slate-700">R$</span>
-                        <span class="text-6xl font-black text-blue-600">29,90</span>
-                        <span class="text-slate-500 font-medium">/mês</span>
-                    </div>
-                    <p class="text-green-600 text-xs font-bold mt-2 bg-green-100 inline-block px-2 py-1 rounded">Menos de R$ 1,00 por dia</p>
-                </div>
+                useEffect(() => {
+                    return onAuthStateChanged(auth, (u) => {
+                        // SEGURANÇA: Só permite entrar se o e-mail for exatamente o seu
+                        if (u && u.email === "salatielvitorino45@gmail.com") {
+                            setUser(u);
+                        } else if (u) {
+                            alert("Acesso negado! Este e-mail (" + u.email + ") não possui permissões de administrador do sistema.");
+                            signOut(auth);
+                            setUser(null);
+                        } else {
+                            setUser(null);
+                        }
+                        setLoading(false);
+                    });
+                }, []);
 
-                <div class="p-8">
-                    <ul class="space-y-4 mb-8">
-                        <li class="flex items-center gap-3 text-slate-600">
-                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
-                            <span>Acesso Ilimitado ao Sistema</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-600">
-                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
-                            <span>Inteligência Artificial Integrada</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-600">
-                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
-                            <span>Armazenamento Seguro em Nuvem</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-600">
-                            <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
-                            <span>Atualizações Gratuitas</span>
-                        </li>
-                    </ul>
+                if (loading) return <div className="h-screen flex items-center justify-center"><div className="loader"></div></div>;
+                return user ? <DashboardAdmin user={user} /> : <AdminLogin />;
+            };
 
-                    <!-- LINK DE CHECKOUT CAKTO COM PIXEL TIKTOK -->
-                    <a href="https://pay.cakto.com.br/scbctc9_679715" 
-                       target="_blank" 
-                       onclick="ttq.track('AddToCart');"
-                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1 text-center flex items-center justify-center gap-2">
-                        ACESSAR SISTEMA AGORA
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </a>
-                    
-                    <p class="text-center text-xs text-slate-400 mt-4 flex items-center justify-center gap-1">
-                        <i data-lucide="lock" class="w-3 h-3"></i> Pagamento Seguro • Acesso Imediato
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+            ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
+        }
 
-    <!-- FAQ -->
-    <section class="py-20 bg-slate-50">
-        <div class="max-w-2xl mx-auto px-4">
-            <h2 class="text-2xl font-bold text-center mb-10 text-slate-800">Dúvidas Frequentes</h2>
-            <div class="space-y-4">
-                <details class="bg-white p-4 rounded-lg shadow-sm cursor-pointer group">
-                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
-                        Funciona no celular?
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
-                    </summary>
-                    <p class="text-slate-600 mt-3 text-sm">Sim! O FluxBlue é um Web App moderno. Funciona perfeitamente no iPhone, Android, Tablet e Computador, sem precisar baixar nada na loja de aplicativos.</p>
-                </details>
-                <details class="bg-white p-4 rounded-lg shadow-sm cursor-pointer group">
-                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
-                        Meus dados estão seguros?
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
-                    </summary>
-                    <p class="text-slate-600 mt-3 text-sm">Absolutamente. Utilizamos a infraestrutura do Google Firebase (a mesma usada por grandes empresas) para criptografar e salvar seus dados na nuvem.</p>
-                </details>
-                <details class="bg-white p-4 rounded-lg shadow-sm cursor-pointer group">
-                    <summary class="font-bold text-slate-700 list-none flex justify-between items-center">
-                        Como acesso o sistema?
-                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition"></i>
-                    </summary>
-                    <p class="text-slate-600 mt-3 text-sm">Assim que você tiver sua conta, basta clicar em "Entrar" no topo desta página. Se você ainda não tem conta, solicite ao administrador.</p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="bg-slate-900 text-slate-400 py-12 text-center text-sm">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex items-center justify-center gap-2 font-bold text-xl tracking-tight text-white mb-4">
-                <i data-lucide="cloud" class="text-blue-600"></i>
-                <span>Flux<span class="text-blue-600">Blue</span></span>
-            </div>
-            <p class="mb-4">Seu controle financeiro definitivo.</p>
-            <div class="flex justify-center gap-4 mb-8">
-                <a href="#" class="hover:text-white transition">Termos de Uso</a>
-                <a href="#" class="hover:text-white transition">Privacidade</a>
-                <a href="#" class="hover:text-white transition">Contato</a>
-            </div>
-            <p>&copy; 2024 FluxBlue Inc. Todos os direitos reservados.</p>
-        </div>
-    </footer>
-
-    <script>
-        // Inicializa ícones
-        lucide.createIcons();
+        if (window.FirebaseSDK) startAdminApp(); else window.addEventListener('firebase-ready', startAdminApp);
     </script>
 </body>
 </html>
