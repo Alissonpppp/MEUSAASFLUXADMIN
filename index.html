@@ -122,22 +122,284 @@ input[type=range]{width:100%;accent-color:var(--blue)}
 .modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .console{height:92px;overflow:auto;background:#041019;border:1px solid #183248;border-radius:9px;padding:8px;font:9px/1.45 ui-monospace,Consolas,monospace;color:#98c5df;white-space:pre-wrap}
 .warning{border-left:3px solid var(--amber);padding:7px 9px;background:#211a0c;color:#f4dca4;font-size:10px;border-radius:4px}
-@media (orientation:portrait){
- body:before{content:"Gire o celular para horizontal";position:fixed;inset:0;z-index:1000;display:grid;place-items:center;
- background:#050b11;color:#dcecff;font-size:18px;font-weight:800}
-}
+
 @media(max-height:620px){
  .top{height:48px}.app{grid-template-rows:48px 1fr}.hd{height:32px}.body{height:calc(100% - 32px);padding:7px}
  .screen{gap:6px;padding:6px}.metric{padding:5px}.metric strong{font-size:13px}.btn{padding:7px 6px}
  .vtrack{min-height:130px}.detent{min-height:38px}.sensor{grid-template-columns:1fr 150px}.horizon{min-height:160px}
 }
+
+
+.sensor-diag{
+  margin-top:8px;padding:8px 9px;border:1px solid #274055;border-radius:9px;
+  background:#07131c;color:#9eb5c8;font-size:10px;line-height:1.4
+}
+.sensor-diag.ok{border-color:#23634a;color:#c8ffe0;background:#0c241a}
+.sensor-diag.warn{border-color:#6a5220;color:#ffe3a1;background:#251c0d}
+.sensor-diag.err{border-color:#78313b;color:#ffd0d5;background:#2c1117}
+
+/* ===== MOBILE RESPONSIVE V2.3 ===== */
+@media(max-width: 980px){
+  html,body{
+    height:auto;
+    min-height:100%;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+  }
+  body{
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .app{
+    min-height:100vh;
+    height:auto;
+    display:block;
+  }
+  .top{
+    position:sticky;
+    top:0;
+    z-index:100;
+    min-height:52px;
+    height:auto;
+    padding:6px 8px;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .logo{
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    font-size:12px;
+  }
+  .brand{
+    flex:1 1 180px;
+  }
+  .brand b{
+    font-size:12px;
+  }
+  .brand small{
+    font-size:9px;
+  }
+  .spacer{
+    display:none;
+  }
+  .status{
+    padding:5px 7px;
+    font-size:9px;
+  }
+  .topbtn{
+    padding:6px 8px;
+    font-size:9px;
+  }
+
+  .screen{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:8px;
+    min-height:auto;
+    overflow:visible;
+  }
+  .col,
+  .left,
+  .middle,
+  .right{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-height:auto;
+  }
+  .card{
+    min-height:auto;
+    overflow:visible;
+  }
+  .body{
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible;
+  }
+  .hd{
+    height:34px;
+    min-height:34px;
+    position:sticky;
+    top:52px;
+    z-index:2;
+    background:#0b1722;
+  }
+
+  .sensor{
+    display:flex;
+    flex-direction:column;
+    height:auto;
+  }
+  .horizon{
+    width:100%;
+    min-height:230px;
+    height:230px;
+  }
+  .sensor-data{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .quad{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    min-height:290px;
+  }
+  .leverbox{
+    min-height:290px;
+  }
+  .vtrack{
+    min-height:210px;
+  }
+
+  .detents{
+    grid-template-columns:repeat(3,1fr);
+  }
+  .detent{
+    min-height:44px;
+  }
+
+  .spoilergrid{
+    display:flex;
+    flex-direction:column;
+    height:auto;
+  }
+  .armbox{
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto;
+  }
+  .armbox button{
+    min-height:46px;
+  }
+
+  .brakes{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "left right"
+      "park park";
+    height:auto;
+  }
+  .brakes .pedal:nth-child(1){grid-area:left}
+  .brakes .pedal:nth-child(2){grid-area:right}
+  .park{
+    grid-area:park;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto;
+  }
+  .pedal .vtrack{
+    min-height:180px;
+    height:180px;
+  }
+  .park button{
+    min-height:58px;
+  }
+
+  .console{
+    height:120px;
+  }
+
+  .settings{
+    align-items:flex-start;
+    overflow:auto;
+    padding-top:16px;
+    padding-bottom:24px;
+  }
+  .modal{
+    max-height:none;
+  }
+}
+
+@media(max-width: 560px){
+  .top{
+    position:sticky;
+    top:0;
+  }
+  .brand small{
+    display:none;
+  }
+  .status{
+    order:3;
+  }
+  .topbtn{
+    order:4;
+    flex:1 1 110px;
+  }
+  .hd{
+    top:84px;
+  }
+  .sensor-data{
+    grid-template-columns:repeat(2,1fr);
+  }
+  .horizon{
+    min-height:200px;
+    height:200px;
+  }
+  .quad{
+    min-height:260px;
+  }
+  .leverbox{
+    min-height:260px;
+  }
+  .vtrack{
+    min-height:180px;
+  }
+  .linkbar{
+    grid-template-columns:1fr;
+  }
+  .detents{
+    grid-template-columns:repeat(2,1fr);
+  }
+  .spoilerlevels{
+    grid-template-columns:repeat(2,1fr);
+  }
+  .modalgrid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-height: 520px) and (orientation:landscape){
+  html,body{
+    overflow:auto;
+  }
+  .top{
+    position:sticky;
+    top:0;
+  }
+  .screen{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:start;
+  }
+  .right{
+    grid-column:1 / -1;
+  }
+  .hd{
+    position:static;
+  }
+  .horizon{
+    min-height:170px;
+    height:170px;
+  }
+  .quad{
+    min-height:220px;
+  }
+  .leverbox{
+    min-height:220px;
+  }
+  .vtrack{
+    min-height:150px;
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="app">
 <header class="top">
   <div class="logo">FS</div>
-  <div class="brand"><b>MSFS MOBILE CONTROLLER V2</b><small>Flight controls • throttle • flaps • spoilers • brakes</small></div>
+  <div class="brand"><b>MSFS MOBILE CONTROLLER V2.3</b><small>Flight controls • throttle • flaps • spoilers • brakes</small></div>
   <div class="spacer"></div>
   <div class="status"><i id="wsDot" class="dot"></i><span id="wsStatus">OFFLINE</span></div>
   <div class="status"><i id="sensorDot" class="dot"></i><span id="sensorStatus">SENSOR OFF</span></div>
@@ -178,6 +440,7 @@ input[type=range]{width:100%;accent-color:var(--blue)}
               <button id="invPitch" class="pill">INVERTER PITCH</button>
               <button id="freezeSensor" class="pill">TRAVAR EIXOS</button>
             </div>
+            <div id="sensorDiag" class="sensor-diag">Sensor ainda não testado.</div>
           </div>
         </div>
       </div>
@@ -318,7 +581,8 @@ AÇÃO:
 // ====================== ESTADO ======================
 const S = {
   ws:null, connected:false, seq:0, packets:0,
-  sensorEnabled:false, sensorFrozen:false, sensorHz:0, sensorTicks:0, sensorTickTime:performance.now(),
+  sensorEnabled:false, sensorPending:false, sensorFrozen:false, sensorHz:0, sensorTicks:0, sensorTickTime:performance.now(),
+  sensorReceivedOrientation:false, sensorReceivedMotion:false, sensorTimeout:null,
   rawRoll:0, rawPitch:0, roll:0, pitch:0, centerRoll:0, centerPitch:0, accX:0, accY:0,
   invertRoll:false, invertPitch:false, maxTilt:25, deadzone:.05, smoothing:.22,
   aileron:0, elevator:0, rudder:0,
@@ -375,7 +639,7 @@ function connectWS(){
     S.ws.onopen=()=>{
       setConnectionUI(true,'PC ONLINE');
       $('connectBtn').textContent='CONECTADO';
-      sendRaw({type:'hello',client:'MSFS Mobile Controller',version:'2.0',ts:Date.now()});
+      sendRaw({type:'hello',client:'MSFS Mobile Controller',version:'2.3',ts:Date.now()});
       log('WebSocket conectado');
     };
     S.ws.onclose=()=>{
@@ -418,7 +682,11 @@ function applyDead(n,dz){
   return s*(a-dz)/(1-dz);
 }
 function handleOrientation(e){
-  if(!S.sensorEnabled || S.sensorFrozen || e.beta==null || e.gamma==null) return;
+  if((!S.sensorEnabled && !S.sensorPending) || S.sensorFrozen || e.beta==null || e.gamma==null) return;
+  if(!S.sensorReceivedOrientation){
+    S.sensorReceivedOrientation=true;
+    confirmSensorRunning();
+  }
   const q=screenAdjusted(e.beta,e.gamma);
   S.rawRoll=q.roll; S.rawPitch=q.pitch;
   const rr=wrapDelta(q.roll,S.centerRoll);
@@ -436,31 +704,142 @@ function handleOrientation(e){
   updateSensorUI();
 }
 function handleMotion(e){
-  if(!S.sensorEnabled) return;
+  if(!S.sensorEnabled && !S.sensorPending) return;
+  if(!S.sensorReceivedMotion){
+    S.sensorReceivedMotion=true;
+    confirmSensorRunning();
+  }
   const a=e.accelerationIncludingGravity || e.acceleration;
   if(a){S.accX=Number(a.x)||0; S.accY=Number(a.y)||0; $('accX').textContent=S.accX.toFixed(2);$('accY').textContent=S.accY.toFixed(2);}
 }
+function setSensorDiag(message,type=''){
+  const el=$('sensorDiag');
+  if(!el) return;
+  el.textContent=message;
+  el.className='sensor-diag'+(type?' '+type:'');
+}
+
+function confirmSensorRunning(){
+  if(!S.sensorReceivedOrientation) return;
+  clearTimeout(S.sensorTimeout);
+  const wasPending=S.sensorPending;
+  S.sensorPending=false;
+  S.sensorEnabled=true;
+  $('sensorDot').classList.add('on');
+  $('sensorStatus').textContent='SENSOR ON';
+  $('sensorBtn').textContent='SENSORES ATIVOS';
+  $('sensorBtn').classList.add('active');
+  setSensorDiag(
+    'OK: o celular está enviando dados reais de orientação.'+
+    (S.sensorReceivedMotion?' Acelerômetro também ativo.':''),
+    'ok'
+  );
+  if(wasPending){
+    setTimeout(calibrate,120);
+    log('Sensores confirmados com leitura real.');
+  }
+}
+
 async function enableSensors(){
+  if(S.sensorPending || S.sensorEnabled) return;
+
+  S.sensorPending=true;
+  S.sensorReceivedOrientation=false;
+  S.sensorReceivedMotion=false;
+  $('sensorBtn').textContent='SOLICITANDO...';
+  $('sensorBtn').classList.remove('active');
+  setSensorDiag('Verificando suporte e solicitando permissão...', 'warn');
+
   try{
-    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
-      const o=await DeviceOrientationEvent.requestPermission();
-      let m='granted';
-      if(typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function') m=await DeviceMotionEvent.requestPermission();
-      if(o!=='granted' || m!=='granted') throw new Error('Permissão de movimento negada');
+    const hasOrientation = typeof DeviceOrientationEvent !== 'undefined';
+    const hasMotion = typeof DeviceMotionEvent !== 'undefined';
+
+    if(!hasOrientation){
+      throw new Error(
+        'O navegador não disponibilizou DeviceOrientationEvent. '+
+        'No iPhone, abra pelo Safari em uma página HTTPS, como GitHub Pages.'
+      );
     }
+
+    // Importante no iPhone: solicita Motion + Orientation juntos, no mesmo toque.
+    const permissionRequests=[];
+
+    if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+      permissionRequests.push(
+        DeviceOrientationEvent.requestPermission().then(value=>({kind:'orientation',value}))
+      );
+    }else{
+      permissionRequests.push(Promise.resolve({kind:'orientation',value:'not-required'}));
+    }
+
+    if(hasMotion && typeof DeviceMotionEvent.requestPermission === 'function'){
+      permissionRequests.push(
+        DeviceMotionEvent.requestPermission().then(value=>({kind:'motion',value}))
+      );
+    }else{
+      permissionRequests.push(Promise.resolve({kind:'motion',value:'not-required'}));
+    }
+
+    const result=await Promise.all(permissionRequests);
+    const permission=Object.fromEntries(result.map(x=>[x.kind,x.value]));
+
+    if(permission.orientation==='denied'){
+      throw new Error('Permissão de Movimento e Orientação foi negada.');
+    }
+
     window.removeEventListener('deviceorientation',handleOrientation);
     window.removeEventListener('devicemotion',handleMotion);
     window.addEventListener('deviceorientation',handleOrientation,{passive:true});
-    window.addEventListener('devicemotion',handleMotion,{passive:true});
-    S.sensorEnabled=true;
-    $('sensorDot').classList.add('on');$('sensorStatus').textContent='SENSOR ON';
-    $('sensorBtn').textContent='SENSORES ATIVOS';$('sensorBtn').classList.add('active');
-    setTimeout(calibrate,450);
+    if(hasMotion) window.addEventListener('devicemotion',handleMotion,{passive:true});
+
+    setSensorDiag(
+      permission.motion==='denied'
+        ? 'Orientação autorizada, mas acelerômetro foi negado. Aguardando orientação...'
+        : 'Permissão concluída. Aguardando dados reais do sensor...',
+      'warn'
+    );
+
+    clearTimeout(S.sensorTimeout);
+    S.sensorTimeout=setTimeout(()=>{
+      if(!S.sensorReceivedOrientation){
+        S.sensorPending=false;
+        S.sensorEnabled=false;
+        window.removeEventListener('deviceorientation',handleOrientation);
+        window.removeEventListener('devicemotion',handleMotion);
+        $('sensorDot').classList.remove('on');
+        $('sensorStatus').textContent='SEM DADOS';
+        $('sensorBtn').textContent='TENTAR NOVAMENTE';
+        $('sensorBtn').classList.remove('active');
+
+        let message='Nenhuma leitura de orientação chegou em 2,5 segundos.';
+        if(!window.isSecureContext){
+          message+=' Esta página não está em HTTPS.';
+        }else{
+          message+=' Verifique a permissão de Movimento e Orientação do Safari.';
+        }
+        setSensorDiag(message,'err');
+        log('Sensor: nenhuma leitura recebida.');
+      }
+    },2500);
+
     try{ await navigator.wakeLock?.request('screen'); }catch{}
-    log('Sensores ativados');
+    log('Permissão solicitada; aguardando leitura real dos sensores.');
   }catch(e){
+    S.sensorPending=false;
+    S.sensorEnabled=false;
+    clearTimeout(S.sensorTimeout);
+    window.removeEventListener('deviceorientation',handleOrientation);
+    window.removeEventListener('devicemotion',handleMotion);
+    $('sensorDot').classList.remove('on');
+    $('sensorStatus').textContent='SENSOR OFF';
+    $('sensorBtn').textContent='TENTAR NOVAMENTE';
+    $('sensorBtn').classList.remove('active');
+    setSensorDiag('ERRO: '+e.message,'err');
     log('Sensor: '+e.message);
-    alert('Não foi possível ativar os sensores.\n\n'+e.message+'\n\nEm alguns celulares a página precisa ser aberta em contexto seguro (HTTPS) e a permissão deve ser concedida.');
+    alert(
+      'Não foi possível ativar os sensores.\n\n'+e.message+
+      '\n\nNo iPhone, use Safari em HTTPS e toque no botão ATIVAR SENSORES para autorizar.'
+    );
   }
 }
 
@@ -468,6 +847,10 @@ function disableSensors(){
   window.removeEventListener('deviceorientation',handleOrientation);
   window.removeEventListener('devicemotion',handleMotion);
   S.sensorEnabled=false;
+  S.sensorPending=false;
+  S.sensorReceivedOrientation=false;
+  S.sensorReceivedMotion=false;
+  clearTimeout(S.sensorTimeout);
   S.sensorFrozen=false;
   S.sensorHz=0;
   S.sensorTicks=0;
@@ -483,6 +866,7 @@ function disableSensors(){
   $('freezeSensor').textContent='TRAVAR EIXOS';
   $('hzLabel').textContent='0 Hz';
   updateSensorUI();
+  setSensorDiag('Sensores desativados.','');
   vibrate(18);
   log('Sensores desativados e eixos centralizados');
 }
@@ -671,7 +1055,14 @@ $('settings').addEventListener('pointerdown',e=>{if(e.target===$('settings'))$('
 const saved=localStorage.getItem('msfs_ws_url');if(saved)$('wsUrl').value=saved;
 if(!window.isSecureContext){
  $('secureWarn').style.display='block';
- $('secureWarn').textContent='Aviso: esta página não está em contexto seguro. Alguns navegadores bloqueiam acelerômetro/giroscópio fora de HTTPS. Se o sensor não liberar, abra o HTML em um navegador que permita sensores locais ou hospede a página em HTTPS.';
+ $('secureWarn').textContent='Aviso: esta página não está em contexto seguro. No iPhone/Safari, acelerômetro e giroscópio exigem HTTPS. Hospede no GitHub Pages ou outro HTTPS.';
+ setSensorDiag('ATENÇÃO: página sem HTTPS. O iPhone pode bloquear os sensores.','warn');
+}else if(typeof DeviceOrientationEvent==='undefined'){
+ setSensorDiag('DeviceOrientationEvent não está disponível. No iPhone, abra pelo Safari.','err');
+}else if(typeof DeviceOrientationEvent.requestPermission==='function'){
+ setSensorDiag('iPhone/Safari detectado: toque ATIVAR SENSORES para solicitar permissão.','warn');
+}else{
+ setSensorDiag('Sensor compatível: toque ATIVAR SENSORES para testar.','');
 }
 startSender();
 log('Painel pronto. Configure a conexão com o PC.');
