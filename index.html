@@ -1,288 +1,680 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FluxBlue - Painel Administrativo</title>
-    
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-
-        window.FirebaseSDK = {
-            initializeApp,
-            auth: { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup },
-            firestore: { getFirestore, doc, setDoc, collection, getDocs, updateDoc, deleteDoc }
-        };
-        window.dispatchEvent(new Event('firebase-ready'));
-    </script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: { 
-                        brand: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
-                        slate: { 850: '#1a2234', 900: '#0f172a' }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #0f172a; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
-        .loader { border: 3px solid #1e293b; border-top: 3px solid #6366f1; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#07111b">
+<title>MSFS 2024 Mobile Flight Controller</title>
+<style>
+:root{
+  --bg:#050b11;--panel:#0b1520;--panel2:#0e1b28;--line:#203447;
+  --text:#ecf6ff;--muted:#8ca3b7;--blue:#4fc3ff;--cyan:#5eead4;
+  --green:#58e39b;--amber:#ffcc66;--red:#ff6978;--shadow:0 12px 40px rgba(0,0,0,.32);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;touch-action:manipulation}
+button,input{font:inherit}
+button{color:var(--text)}
+.app{height:100%;display:grid;grid-template-rows:56px 1fr}
+.top{
+ display:flex;align-items:center;gap:10px;padding:7px max(10px,env(safe-area-inset-left));
+ background:linear-gradient(180deg,#0d1a26,#08121b);border-bottom:1px solid var(--line);box-shadow:var(--shadow);z-index:10
+}
+.logo{width:38px;height:38px;border:1px solid #2b5772;border-radius:10px;display:grid;place-items:center;
+ font-weight:900;letter-spacing:-.04em;background:#0a2231;color:var(--blue)}
+.brand{min-width:0}.brand b{display:block;font-size:14px;white-space:nowrap}.brand small{display:block;color:var(--muted);font-size:10px}
+.spacer{flex:1}
+.status{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:#08131d;font-size:11px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 10px rgba(255,105,120,.3)}
+.dot.on{background:var(--green);box-shadow:0 0 10px rgba(88,227,155,.45)}
+.iconbtn,.topbtn{border:1px solid var(--line);background:#0c1a25;border-radius:9px;padding:7px 10px;font-size:11px}
+.screen{
+ min-height:0;display:grid;grid-template-columns:minmax(310px,1.15fr) minmax(280px,.95fr) minmax(330px,1.05fr);
+ gap:8px;padding:8px;background:
+ radial-gradient(circle at 36% 10%,rgba(79,195,255,.055),transparent 28%),
+ linear-gradient(180deg,#07101a,#050b11)
+}
+.col{min-height:0;display:grid;gap:8px}
+.left{grid-template-rows:minmax(250px,1fr) auto}
+.middle{grid-template-rows:minmax(260px,1fr) auto}
+.right{grid-template-rows:auto minmax(175px,.75fr) minmax(180px,1fr)}
+.card{min-height:0;border:1px solid var(--line);background:linear-gradient(180deg,#0b1722,#08121b);
+ border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.hd{height:38px;display:flex;align-items:center;gap:8px;padding:0 11px;border-bottom:1px solid #172a3a}
+.hd b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#b8cad9}.hd span{margin-left:auto;color:var(--muted);font-size:10px}
+.body{padding:10px;height:calc(100% - 38px);overflow:auto}
+.sensor{height:100%;display:grid;grid-template-columns:minmax(175px,1fr) minmax(135px,.75fr);gap:10px}
+.horizon{
+ position:relative;min-height:220px;border:1px solid #1c3a50;border-radius:16px;overflow:hidden;background:#0a1620;
+ touch-action:none
+}
+.sky,.ground,.hline{position:absolute;left:-45%;width:190%;height:100%}
+.sky{top:-50%;background:linear-gradient(#20587a,#11314a)}
+.ground{top:50%;background:linear-gradient(#4d3723,#2d2117)}
+.hline{top:50%;height:2px;background:rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(0,0,0,.45)}
+.horizon-inner{position:absolute;inset:-55%;transform-origin:50% 50%;transition:transform .035s linear}
+.cross{position:absolute;left:50%;top:50%;width:82px;height:26px;transform:translate(-50%,-50%);z-index:5}
+.cross:before,.cross:after{content:"";position:absolute;top:12px;width:31px;height:3px;background:var(--amber);box-shadow:0 0 0 1px #4c3d15}
+.cross:before{left:0}.cross:after{right:0}
+.cross i{position:absolute;left:39px;top:8px;width:4px;height:12px;background:var(--amber)}
+.pitchmarks{position:absolute;inset:0;z-index:4;pointer-events:none}
+.pitchmarks:before,.pitchmarks:after{content:"";position:absolute;left:50%;width:36px;height:1px;background:rgba(255,255,255,.65);transform:translateX(-50%)}
+.pitchmarks:before{top:36%}.pitchmarks:after{top:64%}
+.sensor-data{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.metric{border:1px solid #1a3042;background:#07131c;border-radius:10px;padding:8px}
+.metric small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+.metric strong{font:700 16px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;color:#dff5ff}
+.metric strong.blue{color:var(--blue)}.metric strong.green{color:var(--green)}
+.ctrls{display:grid;gap:7px;margin-top:8px}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.btn{
+ border:1px solid #274055;background:#102333;border-radius:10px;padding:9px 8px;font-weight:700;font-size:11px;cursor:pointer
+}
+.btn:active{transform:translateY(1px);background:#15354d}
+.btn.blue{border-color:#28648a;background:#10304a;color:#cdefff}.btn.green{border-color:#23634a;background:#113729;color:#d7ffe9}
+.btn.amber{border-color:#695220;background:#352b15;color:#ffe6a8}.btn.red{border-color:#71313b;background:#381921;color:#ffd7dc}
+.btn.active{box-shadow:inset 0 0 0 1px var(--blue),0 0 18px rgba(79,195,255,.12)}
+.configrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:7px;color:var(--muted);font-size:10px}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.switchline{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pill{border:1px solid var(--line);border-radius:999px;background:#091723;color:#9db4c8;padding:5px 8px;font-size:9px}
+.pill.on{border-color:#2b718f;color:#d5f4ff;background:#0c2b3d}
+.quad{height:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.leverbox{position:relative;border:1px solid #1a3346;border-radius:14px;background:#06111a;padding:10px 8px 8px;display:grid;grid-template-rows:1fr auto}
+.vtrack{position:relative;width:54px;height:100%;min-height:180px;margin:auto;border-radius:16px;background:
+ linear-gradient(90deg,#07121b,#12283a 50%,#07121b);border:1px solid #25445b;touch-action:none}
+.vtrack:before{content:"";position:absolute;left:50%;top:12px;bottom:12px;width:2px;background:#24445b;transform:translateX(-50%)}
+.fill{position:absolute;left:8px;right:8px;bottom:8px;height:0;border-radius:9px;background:linear-gradient(180deg,#39a9e6,#1a6b99);opacity:.42}
+.knob{position:absolute;left:-14px;right:-14px;height:38px;bottom:0;border-radius:10px;border:1px solid #3e6a86;
+ background:linear-gradient(180deg,#263e4e,#142633);box-shadow:0 7px 15px rgba(0,0,0,.4);display:grid;place-items:center;font-weight:900;font-size:10px}
+.knob:before{content:"";width:42px;height:3px;background:#7ecfff;border-radius:2px;box-shadow:0 6px 0 #1b3344,-0 -6px 0 #1b3344}
+.levellabel{text-align:center;margin-top:7px}.levellabel b{font:800 17px ui-monospace,Consolas,monospace;color:#dff5ff}.levellabel small{display:block;color:var(--muted);font-size:9px}
+.linkbar{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.rudder{padding:10px}
+.rudderline{display:grid;grid-template-columns:42px 1fr 42px;gap:7px;align-items:center}
+.rudderline label{font-size:10px;color:var(--muted);text-align:center}
+.detents{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.detent{min-height:48px;border:1px solid #26445a;background:#0d2130;border-radius:10px;font-weight:800;font-size:11px}
+.detent.active{border-color:var(--blue);background:#123a54;box-shadow:0 0 15px rgba(79,195,255,.12)}
+.spoilergrid{height:100%;display:grid;grid-template-columns:112px 1fr;gap:9px}
+.armbox{display:grid;grid-template-rows:1fr 1fr;gap:7px}
+.armbox button{border-radius:12px;border:1px solid #395064;background:#10202e;font-weight:900;font-size:12px}
+.armbox .armed.active{border-color:#d6a842;background:#3b2d11;color:#ffe29a}
+.spoilerlevels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:7px}
+.spoilerlevels button{border:1px solid #244159;background:#0c1d2b;border-radius:8px;padding:7px 3px;font-size:9px}
+.brakes{height:100%;display:grid;grid-template-columns:1fr 1fr 120px;gap:10px}
+.pedal{display:grid;grid-template-rows:1fr auto;min-width:0}
+.pedal .vtrack{width:72px}
+.pedal .fill{background:linear-gradient(180deg,#ff9b71,#d64f5e);opacity:.45}
+.pedal .knob:before{background:#ff8994}
+.park{display:grid;grid-template-rows:1fr 1fr;gap:8px}
+.park button{border:1px solid #3b4d5d;border-radius:13px;background:#10202d;font-weight:900}
+.park .parkbtn.active{background:#491a21;border-color:#b74857;color:#ffdce0;box-shadow:0 0 18px rgba(255,105,120,.13)}
+.settings{
+ position:fixed;inset:0;z-index:50;background:rgba(2,6,10,.78);display:none;place-items:center;padding:15px;backdrop-filter:blur(9px)
+}
+.settings.open{display:grid}
+.modal{width:min(580px,100%);max-height:90vh;overflow:auto;border:1px solid #29455a;background:#091722;border-radius:16px;box-shadow:0 25px 90px #000;padding:14px}
+.modal h2{margin:0 0 4px;font-size:16px}.modal p{margin:0 0 12px;color:var(--muted);font-size:11px}
+.field{display:grid;gap:5px;margin:9px 0}.field label{font-size:10px;color:#9cb2c5}.field input[type=text],.field input[type=number]{
+ width:100%;border:1px solid #274158;background:#06121b;color:#e8f6ff;border-radius:9px;padding:10px;outline:none}
+.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.console{height:92px;overflow:auto;background:#041019;border:1px solid #183248;border-radius:9px;padding:8px;font:9px/1.45 ui-monospace,Consolas,monospace;color:#98c5df;white-space:pre-wrap}
+.warning{border-left:3px solid var(--amber);padding:7px 9px;background:#211a0c;color:#f4dca4;font-size:10px;border-radius:4px}
+@media (orientation:portrait){
+ body:before{content:"Gire o celular para horizontal";position:fixed;inset:0;z-index:1000;display:grid;place-items:center;
+ background:#050b11;color:#dcecff;font-size:18px;font-weight:800}
+}
+@media(max-height:620px){
+ .top{height:48px}.app{grid-template-rows:48px 1fr}.hd{height:32px}.body{height:calc(100% - 32px);padding:7px}
+ .screen{gap:6px;padding:6px}.metric{padding:5px}.metric strong{font-size:13px}.btn{padding:7px 6px}
+ .vtrack{min-height:130px}.detent{min-height:38px}.sensor{grid-template-columns:1fr 150px}.horizon{min-height:160px}
+}
+</style>
 </head>
-<body class="antialiased selection:bg-brand-500 selection:text-white">
-    <div id="root"><div class="h-screen flex items-center justify-center"><div class="loader"></div></div></div>
+<body>
+<div class="app">
+<header class="top">
+  <div class="logo">FS</div>
+  <div class="brand"><b>MSFS MOBILE CONTROLLER V2</b><small>Flight controls • throttle • flaps • spoilers • brakes</small></div>
+  <div class="spacer"></div>
+  <div class="status"><i id="wsDot" class="dot"></i><span id="wsStatus">OFFLINE</span></div>
+  <div class="status"><i id="sensorDot" class="dot"></i><span id="sensorStatus">SENSOR OFF</span></div>
+  <button class="topbtn" id="fullBtn">TELA CHEIA</button>
+  <button class="topbtn" id="settingsBtn">CONEXÃO</button>
+</header>
 
-    <script type="text/babel">
-        function startAdminApp() {
-            const { initializeApp } = window.FirebaseSDK;
-            const { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } = window.FirebaseSDK.auth;
-            const { getFirestore, doc, setDoc, collection, getDocs, updateDoc, deleteDoc } = window.FirebaseSDK.firestore;
+<main class="screen">
+  <section class="col left">
+    <div class="card">
+      <div class="hd"><b>Controle por movimento</b><span id="hzLabel">0 Hz</span></div>
+      <div class="body sensor">
+        <div class="horizon">
+          <div id="horizonInner" class="horizon-inner">
+            <div class="sky"></div><div class="ground"></div><div class="hline"></div>
+          </div>
+          <div class="pitchmarks"></div><div class="cross"><i></i></div>
+        </div>
+        <div>
+          <div class="sensor-data">
+            <div class="metric"><small>AILERON</small><strong id="aileronPct" class="blue">0%</strong></div>
+            <div class="metric"><small>ELEVATOR</small><strong id="elevatorPct" class="green">0%</strong></div>
+            <div class="metric"><small>ROLL</small><strong id="rollDeg">0.0°</strong></div>
+            <div class="metric"><small>PITCH</small><strong id="pitchDeg">0.0°</strong></div>
+            <div class="metric"><small>ACC X</small><strong id="accX">0.00</strong></div>
+            <div class="metric"><small>ACC Y</small><strong id="accY">0.00</strong></div>
+          </div>
+          <div class="ctrls">
+            <div class="btnrow">
+              <button id="sensorBtn" class="btn blue">ATIVAR SENSORES</button>
+              <button id="sensorOffBtn" class="btn red">DESATIVAR SENSORES</button>
+            </div>
+            <button id="calBtn" class="btn green">CALIBRAR CENTRO</button>
+            <div class="configrow"><span>Curso</span><input id="tiltRange" type="range" min="10" max="55" value="25"><b id="tiltVal">25°</b></div>
+            <div class="configrow"><span>Deadzone</span><input id="deadRange" type="range" min="0" max="20" value="5"><b id="deadVal">5%</b></div>
+            <div class="switchline">
+              <button id="invRoll" class="pill">INVERTER ROLL</button>
+              <button id="invPitch" class="pill">INVERTER PITCH</button>
+              <button id="freezeSensor" class="pill">TRAVAR EIXOS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card rudder">
+      <div class="rudderline"><label>LEFT</label><input id="rudder" type="range" min="-100" max="100" value="0"><label>RIGHT</label></div>
+      <div style="text-align:center;color:var(--muted);font-size:9px;margin-top:4px">RUDDER TOUCH • solta e volta ao centro</div>
+    </div>
+  </section>
 
-            // MESMA CONFIGURAÇÃO DE BANCO DE DADOS DO APP PRINCIPAL
-            const firebaseConfig = {
-                apiKey: "AIzaSyB5I6RG-FicgOThwhl-1LLWySo3JRjK1YI",
-                authDomain: "bompre-8a7c0.firebaseapp.com",
-                projectId: "bompre-8a7c0",
-                storageBucket: "bompre-8a7c0.firebasestorage.app",
-                messagingSenderId: "390830730249",
-                appId: "1:390830730249:web:106a313c6d2bae02ec5cd8"
-            };
+  <section class="col middle">
+    <div class="card">
+      <div class="hd"><b>Throttle quadrant</b><span id="syncLabel">SYNC ON</span></div>
+      <div class="body">
+        <div class="quad">
+          <div class="leverbox">
+            <div id="thr1" class="vtrack" data-value="0"><div class="fill"></div><div class="knob"></div></div>
+            <div class="levellabel"><b id="thr1v">0%</b><small>ENGINE 1</small></div>
+          </div>
+          <div class="leverbox">
+            <div id="thr2" class="vtrack" data-value="0"><div class="fill"></div><div class="knob"></div></div>
+            <div class="levellabel"><b id="thr2v">0%</b><small>ENGINE 2</small></div>
+          </div>
+        </div>
+        <div class="linkbar">
+          <button id="syncBtn" class="btn blue active">SYNC THROTTLES</button>
+          <button id="idleBtn" class="btn">IDLE</button>
+        </div>
+        <div class="linkbar">
+          <button id="rev1Btn" class="btn amber">REV ENG 1</button>
+          <button id="rev2Btn" class="btn amber">REV ENG 2</button>
+        </div>
+        <div class="linkbar">
+          <button id="revBothBtn" class="btn amber">REV BOTH</button>
+          <button id="revOffBtn" class="btn">REV OFF</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="hd"><b>Flaps</b><span id="flapsText">UP</span></div>
+      <div class="body" style="height:auto">
+        <div class="detents">
+          <button class="detent active" data-flap="UP">UP</button>
+          <button class="detent" data-flap="1">1</button>
+          <button class="detent" data-flap="2">2</button>
+          <button class="detent" data-flap="3">3</button>
+          <button class="detent" data-flap="4">4</button>
+          <button class="detent" data-flap="FULL">FULL</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const appId = 'fluxblue-prod-v6';
-            const { useState, useEffect } = React;
+  <section class="col right">
+    <div class="card">
+      <div class="hd"><b>Spoilers / speed brake</b><span id="spoilerText">0% • SAFE</span></div>
+      <div class="body spoilergrid">
+        <div class="armbox">
+          <button id="armBtn" class="armed">ARM</button>
+          <button id="disarmBtn">DISARM</button>
+        </div>
+        <div>
+          <input id="spoiler" type="range" min="0" max="100" value="0">
+          <div class="spoilerlevels">
+            <button data-sp="0">0%</button><button data-sp="25">25%</button><button data-sp="50">50%</button>
+            <button data-sp="75">75%</button><button data-sp="100">100%</button><button id="spDown">RETRACT</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            const AdminLogin = () => {
-                const [email, setEmail] = useState(''); 
-                const [password, setPassword] = useState('');
-                const [error, setError] = useState('');
-                const [loading, setLoading] = useState(false);
+    <div class="card">
+      <div class="hd"><b>Pedal brakes</b><span>LEFT / RIGHT</span></div>
+      <div class="body brakes">
+        <div class="pedal">
+          <div id="brakeL" class="vtrack" data-value="0"><div class="fill"></div><div class="knob"></div></div>
+          <div class="levellabel"><b id="brakeLv">0%</b><small>LEFT BRAKE</small></div>
+        </div>
+        <div class="pedal">
+          <div id="brakeR" class="vtrack" data-value="0"><div class="fill"></div><div class="knob"></div></div>
+          <div class="levellabel"><b id="brakeRv">0%</b><small>RIGHT BRAKE</small></div>
+        </div>
+        <div class="park">
+          <button id="bothBrake">BRAKES<br>100%</button>
+          <button id="parkBtn" class="parkbtn">PARKING<br>BRAKE</button>
+        </div>
+      </div>
+    </div>
 
-                const handleLogin = async (e) => {
-                    e.preventDefault();
-                    setError('');
-                    setLoading(true);
-                    try { 
-                        await signInWithEmailAndPassword(auth, email, password); 
-                    } catch (err) { 
-                        setError("Acesso negado. Verifique suas credenciais."); 
-                        setLoading(false);
-                    }
-                };
+    <div class="card">
+      <div class="hd"><b>Saída de dados</b><span id="packetCount">0 packets</span></div>
+      <div class="body">
+        <div id="miniConsole" class="console"></div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
 
-                const handleGoogleLogin = async () => {
-                    setError('');
-                    setLoading(true);
-                    try {
-                        await signInWithPopup(auth, new GoogleAuthProvider());
-                    } catch (err) {
-                        setError("Erro ao autenticar com Google: " + err.message);
-                        setLoading(false);
-                    }
-                };
+<div id="settings" class="settings">
+  <div class="modal">
+    <h2>Conexão com o PC</h2>
+    <p>Este HTML envia JSON por WebSocket. No PC, um bridge deve receber esses pacotes e repassar os eventos ao SimConnect/MSFS 2024.</p>
+    <div id="secureWarn" class="warning" style="display:none"></div>
+    <div class="field"><label>ENDEREÇO WEBSOCKET DO PC</label><input id="wsUrl" type="text" value="ws://192.168.0.100:8765"></div>
+    <div class="modalgrid">
+      <div class="field"><label>TAXA DOS EIXOS (Hz)</label><input id="sendHz" type="number" min="10" max="60" value="30"></div>
+      <div class="field"><label>SUAVIZAÇÃO SENSOR (0.05–1.0)</label><input id="smooth" type="number" min=".05" max="1" step=".05" value=".22"></div>
+    </div>
+    <div class="btnrow">
+      <button id="connectBtn" class="btn green">CONECTAR</button>
+      <button id="disconnectBtn" class="btn red">DESCONECTAR</button>
+    </div>
+    <div class="btnrow" style="margin-top:7px">
+      <button id="testBtn" class="btn">ENVIAR TESTE</button>
+      <button id="closeSettings" class="btn blue">FECHAR</button>
+    </div>
+    <h2 style="font-size:11px;margin-top:14px">Protocolo enviado</h2>
+    <div class="console">FRAME:
+{"type":"frame","commands":[
+ {"event":"AXIS_AILERONS_SET","params":[...]},
+ {"event":"AXIS_ELEVATOR_SET","params":[...]},
+ {"event":"AXIS_RUDDER_SET","params":[...]},
+ {"event":"THROTTLE1_AXIS_SET_EX1","params":[...]},
+ {"event":"THROTTLE2_AXIS_SET_EX1","params":[...]},
+ {"event":"AXIS_LEFT_BRAKE_SET","params":[...]},
+ {"event":"AXIS_RIGHT_BRAKE_SET","params":[...]}
+]}
 
-                return (
-                    <div className="min-h-screen flex items-center justify-center p-4">
-                        <div className="bg-slate-800 p-8 rounded-3xl max-w-md w-full border border-slate-700 shadow-2xl">
-                            <div className="text-center mb-6">
-                                <div className="w-12 h-12 bg-brand-500/20 text-brand-500 rounded-2xl flex items-center justify-center font-black text-xl mx-auto mb-3">⚡</div>
-                                <h1 className="text-2xl font-extrabold text-white">Painel do Admin</h1>
-                                <p className="text-slate-400 text-xs mt-1">Acesso restrito ao gestor do sistema</p>
-                            </div>
-                            {error && <div className="bg-rose-500/20 border border-rose-500/30 text-rose-300 p-3 rounded-xl mb-4 text-xs font-semibold">{error}</div>}
-                            <form onSubmit={handleLogin} className="space-y-4">
-                                <input type="email" placeholder="E-mail de Administrador" required className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-brand-500" value={email} onChange={e=>setEmail(e.target.value)} />
-                                <input type="password" placeholder="Senha" required className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-brand-500" value={password} onChange={e=>setPassword(e.target.value)} />
-                                <button disabled={loading} className="w-full bg-brand-600 hover:bg-brand-500 font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-brand-600/30">{loading ? 'Acessando...' : 'Acessar Painel'}</button>
-                            </form>
-                            <div className="relative my-6"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700"></div></div><div className="relative flex justify-center text-[10px] uppercase"><span className="bg-slate-800 px-3 text-slate-500 font-bold tracking-wider">Ou</span></div></div>
-                            <button onClick={handleGoogleLogin} disabled={loading} className="w-full bg-slate-700 hover:bg-slate-600 py-3.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2">
-                                Entrar com Google
-                            </button>
-                        </div>
-                    </div>
-                );
-            };
+AÇÃO:
+{"type":"command","event":"FLAPS_1","params":[]}</div>
+  </div>
+</div>
 
-            const DashboardAdmin = ({ user }) => {
-                const [users, setUsers] = useState([]);
-                const [loading, setLoading] = useState(true);
-                const [searchTerm, setSearchTerm] = useState('');
+<script>
+'use strict';
 
-                const fetchUsers = async () => {
-                    setLoading(true);
-                    try {
-                        const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public_users'));
-                        const list = querySnapshot.docs.map(d => {
-                            const data = d.data();
-                            const expires = data.expiresAt ? new Date(data.expiresAt) : new Date(0);
-                            const isExpired = new Date() > expires;
-                            return { id: d.id, ...data, isExpired };
-                        });
-                        setUsers(list);
-                    } catch (e) {
-                        console.error("Erro ao buscar usuários:", e);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
+// ====================== ESTADO ======================
+const S = {
+  ws:null, connected:false, seq:0, packets:0,
+  sensorEnabled:false, sensorFrozen:false, sensorHz:0, sensorTicks:0, sensorTickTime:performance.now(),
+  rawRoll:0, rawPitch:0, roll:0, pitch:0, centerRoll:0, centerPitch:0, accX:0, accY:0,
+  invertRoll:false, invertPitch:false, maxTilt:25, deadzone:.05, smoothing:.22,
+  aileron:0, elevator:0, rudder:0,
+  throttle1:0, throttle2:0, syncThrottle:true, reverse1:false, reverse2:false,
+  brakeL:0, brakeR:0, parking:false,
+  spoilers:0, spoilerArmed:false, flaps:'UP',
+  sendHz:30, sendTimer:null
+};
 
-                useEffect(() => { fetchUsers(); }, []);
+const $ = id => document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const axis16 = n => Math.round(clamp(n,-1,1)*16383);
+const throttle16 = n => Math.round(clamp(n,0,1)*16383);
+const brake16 = n => Math.round(-16383 + clamp(n,0,1)*32766);
+const pct = n => Math.round(n*100);
 
-                const toggleStatus = async (uid, active, extend = false) => {
-                    try {
-                        let updates = { active };
-                        if (extend) {
-                            const nextMonth = new Date(); 
-                            nextMonth.setDate(nextMonth.getDate() + 30);
-                            updates.expiresAt = nextMonth.toISOString();
-                        } else if (!active) {
-                            const yesterday = new Date(); 
-                            yesterday.setDate(yesterday.getDate() - 1);
-                            updates.expiresAt = yesterday.toISOString();
-                        }
-                        
-                        await updateDoc(doc(db, 'artifacts', appId, 'public_users', uid), updates);
-                        await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'data', 'finance'), { 
-                            subscription: { active, expiresAt: updates.expiresAt } 
-                        }, { merge: true });
-                        
-                        fetchUsers();
-                        alert(active ? 'Assinatura renovada por +30 dias com sucesso!' : 'Acesso revogado!');
-                    } catch (e) {
-                        alert("Erro ao atualizar status: " + e.message);
-                    }
-                };
+function vibrate(ms=12){ try{ navigator.vibrate?.(ms); }catch{} }
+function log(msg){
+  const el=$('miniConsole');
+  const time=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.textContent = `[${time}] ${msg}\n` + el.textContent.split('\n').slice(0,7).join('\n');
+}
 
-                const deleteUserDoc = async (uid) => {
-                    if(!confirm('ATENÇÃO: Excluir este usuário apagará todo o registro financeiro dele no banco de dados. Deseja continuar?')) return;
-                    try {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public_users', uid));
-                        await deleteDoc(doc(db, 'artifacts', appId, 'users', uid, 'data', 'finance'));
-                        fetchUsers();
-                    } catch (e) {
-                        alert("Erro ao excluir usuário: " + e.message);
-                    }
-                };
+function sendRaw(obj){
+  if(!S.connected || !S.ws || S.ws.readyState!==WebSocket.OPEN) return false;
+  try{
+    S.ws.send(JSON.stringify(obj));
+    S.packets++; $('packetCount').textContent=S.packets+' packets';
+    return true;
+  }catch(e){ log('ERRO SEND: '+e.message); return false; }
+}
 
-                const filteredUsers = users.filter(u => 
-                    (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                    (u.id && u.id.toLowerCase().includes(searchTerm.toLowerCase()))
-                );
+function sendCommand(event, ...params){
+  vibrate();
+  sendRaw({type:'command',event,params,seq:++S.seq,ts:Date.now()});
+  log(`${event}${params.length?' '+params.join(','):''}`);
+}
 
-                return (
-                    <div className="max-w-6xl mx-auto p-4 md:p-8">
-                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-slate-800 gap-4">
-                            <div>
-                                <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
-                                    <span>Gestão de Clientes</span>
-                                    <span className="text-xs bg-brand-500/20 text-brand-400 border border-brand-500/30 px-2.5 py-0.5 rounded-full font-bold">{users.length} total</span>
-                                </h1>
-                                <p className="text-slate-400 text-xs mt-1">Administrador conectado: <strong className="text-slate-200">{user.email}</strong></p>
-                            </div>
-                            <div className="flex items-center gap-3 w-full md:w-auto">
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar por e-mail ou ID..." 
-                                    className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 flex-1 md:w-64"
-                                    value={searchTerm}
-                                    onChange={e=>setSearchTerm(e.target.value)}
-                                />
-                                <button onClick={()=>signOut(auth)} className="bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition">Sair</button>
-                            </div>
-                        </header>
+// ====================== WEBSOCKET ======================
+function setConnectionUI(on, text){
+  S.connected=on;
+  $('wsDot').classList.toggle('on',on);
+  $('wsStatus').textContent=text || (on?'ONLINE':'OFFLINE');
+}
+function connectWS(){
+  const url=$('wsUrl').value.trim();
+  if(!url) return;
+  localStorage.setItem('msfs_ws_url',url);
+  $('connectBtn').textContent='CONECTANDO...';
+  try{
+    if(S.ws) try{S.ws.close()}catch{}
+    S.ws=new WebSocket(url);
+    S.ws.onopen=()=>{
+      setConnectionUI(true,'PC ONLINE');
+      $('connectBtn').textContent='CONECTADO';
+      sendRaw({type:'hello',client:'MSFS Mobile Controller',version:'2.0',ts:Date.now()});
+      log('WebSocket conectado');
+    };
+    S.ws.onclose=()=>{
+      setConnectionUI(false,'OFFLINE');
+      $('connectBtn').textContent='CONECTAR';
+      log('WebSocket desconectado');
+    };
+    S.ws.onerror=()=>{setConnectionUI(false,'ERRO');log('Erro de WebSocket')};
+    S.ws.onmessage=e=>{
+      try{
+        const m=JSON.parse(e.data);
+        if(m.type==='status') log('PC: '+(m.message||'status'));
+      }catch{}
+    };
+  }catch(e){ log('Falha ao conectar: '+e.message); }
+}
+function disconnectWS(){ if(S.ws) S.ws.close(); setConnectionUI(false,'OFFLINE'); }
 
-                        {loading ? (
-                            <div className="text-center py-20"><div className="loader mx-auto mb-3"></div><p className="text-slate-400 text-xs font-semibold">Carregando base de usuários...</p></div>
-                        ) : (
-                            <div className="grid gap-3">
-                                {filteredUsers.map(u => (
-                                    <div key={u.id} className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 hover:border-slate-600 transition">
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <span className="font-extrabold text-base text-white truncate">{u.email || 'Usuário sem e-mail'}</span>
-                                                {u.isExpired || !u.active ? (
-                                                    <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] px-2 py-0.5 rounded-md font-extrabold uppercase tracking-wider">Vencido / Bloqueado</span>
-                                                ) : (
-                                                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded-md font-extrabold uppercase tracking-wider">Ativo</span>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
-                                                <p className="font-mono text-[11px] select-all cursor-pointer hover:text-slate-300" title="Clique para copiar" onClick={()=>{navigator.clipboard.writeText(u.id); alert('ID copiado!');}}>ID: {u.id}</p>
-                                                <span>•</span>
-                                                <span>Expira em: <strong className="text-slate-300">{u.expiresAt ? new Date(u.expiresAt).toLocaleDateString('pt-BR') : 'N/A'}</strong></span>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                                            <button onClick={()=>toggleStatus(u.id, true, true)} className="flex-1 lg:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-md shadow-emerald-600/20">
-                                                +30 Dias (Aprovar)
-                                            </button>
-                                            <button onClick={()=>toggleStatus(u.id, false, false)} className="flex-1 lg:flex-none bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition">
-                                                Bloquear Acesso
-                                            </button>
-                                            <button onClick={()=>deleteUserDoc(u.id)} className="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/20 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center" title="Excluir Usuário">
-                                                Excluir
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {filteredUsers.length === 0 && (
-                                    <div className="text-center py-16 bg-slate-800/40 rounded-3xl border border-slate-800 text-slate-500 text-xs">
-                                        Nenhum usuário encontrado na busca.
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                );
-            };
+// ====================== SENSORES ======================
+function screenAdjusted(beta,gamma){
+  const angle = (screen.orientation && Number.isFinite(screen.orientation.angle))
+    ? screen.orientation.angle
+    : (Number(window.orientation)||0);
+  const a=angle*Math.PI/180;
+  // vetor de inclinação adaptado à rotação da tela
+  const r = gamma*Math.cos(a) + beta*Math.sin(a);
+  const p = beta*Math.cos(a) - gamma*Math.sin(a);
+  return {roll:r,pitch:p};
+}
+function wrapDelta(v,center){
+  let d=v-center;
+  while(d>180)d-=360;
+  while(d<-180)d+=360;
+  return d;
+}
+function applyDead(n,dz){
+  const a=Math.abs(n);
+  if(a<=dz)return 0;
+  const s=Math.sign(n);
+  return s*(a-dz)/(1-dz);
+}
+function handleOrientation(e){
+  if(!S.sensorEnabled || S.sensorFrozen || e.beta==null || e.gamma==null) return;
+  const q=screenAdjusted(e.beta,e.gamma);
+  S.rawRoll=q.roll; S.rawPitch=q.pitch;
+  const rr=wrapDelta(q.roll,S.centerRoll);
+  const rp=wrapDelta(q.pitch,S.centerPitch);
+  const a=clamp(S.smoothing,.05,1);
+  S.roll=lerp(S.roll,rr,a);
+  S.pitch=lerp(S.pitch,rp,a);
+  let rn=applyDead(clamp(S.roll/S.maxTilt,-1,1),S.deadzone);
+  let pn=applyDead(clamp(S.pitch/S.maxTilt,-1,1),S.deadzone);
+  if(S.invertRoll) rn*=-1;
+  if(S.invertPitch) pn*=-1;
+  S.aileron=rn;
+  S.elevator=-pn; // inclinar topo do celular para frente = nariz para baixo
+  S.sensorTicks++;
+  updateSensorUI();
+}
+function handleMotion(e){
+  if(!S.sensorEnabled) return;
+  const a=e.accelerationIncludingGravity || e.acceleration;
+  if(a){S.accX=Number(a.x)||0; S.accY=Number(a.y)||0; $('accX').textContent=S.accX.toFixed(2);$('accY').textContent=S.accY.toFixed(2);}
+}
+async function enableSensors(){
+  try{
+    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
+      const o=await DeviceOrientationEvent.requestPermission();
+      let m='granted';
+      if(typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function') m=await DeviceMotionEvent.requestPermission();
+      if(o!=='granted' || m!=='granted') throw new Error('Permissão de movimento negada');
+    }
+    window.removeEventListener('deviceorientation',handleOrientation);
+    window.removeEventListener('devicemotion',handleMotion);
+    window.addEventListener('deviceorientation',handleOrientation,{passive:true});
+    window.addEventListener('devicemotion',handleMotion,{passive:true});
+    S.sensorEnabled=true;
+    $('sensorDot').classList.add('on');$('sensorStatus').textContent='SENSOR ON';
+    $('sensorBtn').textContent='SENSORES ATIVOS';$('sensorBtn').classList.add('active');
+    setTimeout(calibrate,450);
+    try{ await navigator.wakeLock?.request('screen'); }catch{}
+    log('Sensores ativados');
+  }catch(e){
+    log('Sensor: '+e.message);
+    alert('Não foi possível ativar os sensores.\n\n'+e.message+'\n\nEm alguns celulares a página precisa ser aberta em contexto seguro (HTTPS) e a permissão deve ser concedida.');
+  }
+}
 
-            const Root = () => {
-                const [user, setUser] = useState(null); 
-                const [loading, setLoading] = useState(true);
+function disableSensors(){
+  window.removeEventListener('deviceorientation',handleOrientation);
+  window.removeEventListener('devicemotion',handleMotion);
+  S.sensorEnabled=false;
+  S.sensorFrozen=false;
+  S.sensorHz=0;
+  S.sensorTicks=0;
+  S.aileron=0;
+  S.elevator=0;
+  S.roll=0;
+  S.pitch=0;
+  $('sensorDot').classList.remove('on');
+  $('sensorStatus').textContent='SENSOR OFF';
+  $('sensorBtn').textContent='ATIVAR SENSORES';
+  $('sensorBtn').classList.remove('active');
+  $('freezeSensor').classList.remove('on');
+  $('freezeSensor').textContent='TRAVAR EIXOS';
+  $('hzLabel').textContent='0 Hz';
+  updateSensorUI();
+  vibrate(18);
+  log('Sensores desativados e eixos centralizados');
+}
+function calibrate(){
+  S.centerRoll=S.rawRoll; S.centerPitch=S.rawPitch; S.roll=0;S.pitch=0;S.aileron=0;S.elevator=0;
+  vibrate(25); updateSensorUI(); log('Centro do acelerômetro calibrado');
+}
+function updateSensorUI(){
+  $('rollDeg').textContent=S.roll.toFixed(1)+'°';$('pitchDeg').textContent=S.pitch.toFixed(1)+'°';
+  $('aileronPct').textContent=(S.aileron>=0?'+':'')+pct(S.aileron)+'%';
+  $('elevatorPct').textContent=(S.elevator>=0?'+':'')+pct(S.elevator)+'%';
+  const h=$('horizonInner');
+  h.style.transform=`translateY(${clamp(S.pitch,-30,30)*2.0}px) rotate(${-clamp(S.roll,-55,55)}deg)`;
+}
 
-                useEffect(() => {
-                    return onAuthStateChanged(auth, (u) => {
-                        // SEGURANÇA: Só permite entrar se o e-mail for exatamente o seu
-                        if (u && u.email === "salatielvitorino45@gmail.com") {
-                            setUser(u);
-                        } else if (u) {
-                            alert("Acesso negado! Este e-mail (" + u.email + ") não possui permissões de administrador do sistema.");
-                            signOut(auth);
-                            setUser(null);
-                        } else {
-                            setUser(null);
-                        }
-                        setLoading(false);
-                    });
-                }, []);
+// ====================== EIXOS / CONTROLES ======================
+function makeVertical(id,onChange,releaseToZero=false){
+  const el=$(id), knob=el.querySelector('.knob'), fill=el.querySelector('.fill');
+  let dragging=false;
+  function set(v,emit=true){
+    v=clamp(v,0,1);el.dataset.value=v;
+    const usable=Math.max(1,el.clientHeight-46);
+    knob.style.bottom=(7+v*usable)+'px';
+    fill.style.height=(8+v*usable)+'px';
+    if(emit)onChange(v);
+  }
+  function fromPointer(e){
+    const r=el.getBoundingClientRect();
+    set(1-clamp((e.clientY-r.top)/r.height,0,1));
+  }
+  el.addEventListener('pointerdown',e=>{dragging=true;el.setPointerCapture(e.pointerId);fromPointer(e);vibrate(5)});
+  el.addEventListener('pointermove',e=>{if(dragging)fromPointer(e)});
+  el.addEventListener('pointerup',e=>{dragging=false;if(releaseToZero)set(0)});
+  el.addEventListener('pointercancel',()=>{dragging=false;if(releaseToZero)set(0)});
+  set(0,false);
+  return {set};
+}
+let thr1Ctl,thr2Ctl,brakeLCtl,brakeRCtl;
 
-                if (loading) return <div className="h-screen flex items-center justify-center"><div className="loader"></div></div>;
-                return user ? <DashboardAdmin user={user} /> : <AdminLogin />;
-            };
+function setThrottle1(v,fromSync=false){
+  S.throttle1=v;$('thr1v').textContent=Math.round(v*100)+'%';
+  if(S.syncThrottle && !fromSync){S.throttle2=v;thr2Ctl.set(v,false);$('thr2v').textContent=Math.round(v*100)+'%';}
+}
+function setThrottle2(v,fromSync=false){
+  S.throttle2=v;$('thr2v').textContent=Math.round(v*100)+'%';
+  if(S.syncThrottle && !fromSync){S.throttle1=v;thr1Ctl.set(v,false);$('thr1v').textContent=Math.round(v*100)+'%';}
+}
+function setBrakeL(v){S.brakeL=v;$('brakeLv').textContent=Math.round(v*100)+'%'}
+function setBrakeR(v){S.brakeR=v;$('brakeRv').textContent=Math.round(v*100)+'%'}
 
-            ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
-        }
+function setSpoilers(v){
+  S.spoilers=clamp(v/100,0,1);$('spoiler').value=Math.round(S.spoilers*100);
+  $('spoilerText').textContent=Math.round(S.spoilers*100)+'% • '+(S.spoilerArmed?'ARMED':'SAFE');
+  sendCommand('SPOILERS_SET',Math.round(S.spoilers*16383));
+}
+function setSpoilerArm(on){
+  S.spoilerArmed=on;$('armBtn').classList.toggle('active',on);
+  $('spoilerText').textContent=Math.round(S.spoilers*100)+'% • '+(on?'ARMED':'SAFE');
+  sendCommand('SPOILERS_ARM_SET',on?1:0);
+}
+function setFlap(name){
+  S.flaps=name;
+  document.querySelectorAll('.detent').forEach(b=>b.classList.toggle('active',b.dataset.flap===name));
+  $('flapsText').textContent=name;
+  const map={UP:'FLAPS_UP','1':'FLAPS_1','2':'FLAPS_2','3':'FLAPS_3','4':'FLAPS_4',FULL:'FLAPS_DOWN'};
+  sendCommand(map[name]);
+}
 
-        if (window.FirebaseSDK) startAdminApp(); else window.addEventListener('firebase-ready', startAdminApp);
-    </script>
+
+function setReverse(engine,on){
+  if(engine===1){
+    S.reverse1=on;
+    $('rev1Btn').classList.toggle('active',on);
+    $('rev1Btn').textContent=on?'REV 1 ON':'REV ENG 1';
+    sendCommand(on?'SET_THROTTLE1_REVERSE_THRUST_ON':'SET_THROTTLE1_REVERSE_THRUST_OFF');
+  }else{
+    S.reverse2=on;
+    $('rev2Btn').classList.toggle('active',on);
+    $('rev2Btn').textContent=on?'REV 2 ON':'REV ENG 2';
+    sendCommand(on?'SET_THROTTLE2_REVERSE_THRUST_ON':'SET_THROTTLE2_REVERSE_THRUST_OFF');
+  }
+}
+function setReverseBoth(on){
+  setReverse(1,on);
+  setReverse(2,on);
+}
+
+// ====================== FRAME EM TEMPO REAL ======================
+function startSender(){
+  clearInterval(S.sendTimer);
+  S.sendHz=clamp(Number($('sendHz').value)||30,10,60);
+  const ms=Math.round(1000/S.sendHz);
+  S.sendTimer=setInterval(()=>{
+    const frame={
+      type:'frame', seq:++S.seq, ts:Date.now(),
+      commands:[
+        {event:'AXIS_AILERONS_SET',params:[axis16(S.sensorFrozen?0:S.aileron)]},
+        {event:'AXIS_ELEVATOR_SET',params:[axis16(S.sensorFrozen?0:S.elevator)]},
+        {event:'AXIS_RUDDER_SET',params:[axis16(S.rudder)]},
+        {event:'THROTTLE1_AXIS_SET_EX1',params:[throttle16(S.throttle1)]},
+        {event:'THROTTLE2_AXIS_SET_EX1',params:[throttle16(S.throttle2)]},
+        {event:'AXIS_LEFT_BRAKE_SET',params:[brake16(S.brakeL)]},
+        {event:'AXIS_RIGHT_BRAKE_SET',params:[brake16(S.brakeR)]}
+      ]
+    };
+    sendRaw(frame);
+  },ms);
+}
+setInterval(()=>{
+  const now=performance.now(),dt=(now-S.sensorTickTime)/1000;
+  S.sensorHz=dt>0?Math.round(S.sensorTicks/dt):0;S.sensorTicks=0;S.sensorTickTime=now;
+  $('hzLabel').textContent=S.sensorHz+' Hz';
+},1000);
+
+// ====================== UI ======================
+thr1Ctl=makeVertical('thr1',setThrottle1);
+thr2Ctl=makeVertical('thr2',setThrottle2);
+brakeLCtl=makeVertical('brakeL',setBrakeL,true);
+brakeRCtl=makeVertical('brakeR',setBrakeR,true);
+
+$('sensorBtn').onclick=enableSensors;$('sensorOffBtn').onclick=disableSensors;$('calBtn').onclick=calibrate;
+$('tiltRange').oninput=e=>{S.maxTilt=+e.target.value;$('tiltVal').textContent=S.maxTilt+'°'};
+$('deadRange').oninput=e=>{S.deadzone=+e.target.value/100;$('deadVal').textContent=e.target.value+'%'};
+$('invRoll').onclick=e=>{S.invertRoll=!S.invertRoll;e.target.classList.toggle('on',S.invertRoll)};
+$('invPitch').onclick=e=>{S.invertPitch=!S.invertPitch;e.target.classList.toggle('on',S.invertPitch)};
+$('freezeSensor').onclick=e=>{
+ S.sensorFrozen=!S.sensorFrozen;e.target.classList.toggle('on',S.sensorFrozen);e.target.textContent=S.sensorFrozen?'EIXOS TRAVADOS':'TRAVAR EIXOS';
+ if(S.sensorFrozen){S.aileron=0;S.elevator=0;updateSensorUI()}
+};
+
+$('syncBtn').onclick=e=>{
+ S.syncThrottle=!S.syncThrottle;e.target.classList.toggle('active',S.syncThrottle);
+ $('syncLabel').textContent=S.syncThrottle?'SYNC ON':'SYNC OFF';
+};
+$('idleBtn').onclick=()=>{
+ thr1Ctl.set(0);thr2Ctl.set(0);S.throttle1=S.throttle2=0;$('thr1v').textContent=$('thr2v').textContent='0%';vibrate(20)
+};
+$('rev1Btn').onclick=()=>setReverse(1,!S.reverse1);
+$('rev2Btn').onclick=()=>setReverse(2,!S.reverse2);
+$('revBothBtn').onclick=()=>setReverseBoth(!(S.reverse1&&S.reverse2));
+$('revOffBtn').onclick=()=>setReverseBoth(false);
+
+document.querySelectorAll('.detent').forEach(b=>b.onclick=()=>setFlap(b.dataset.flap));
+$('spoiler').oninput=e=>{S.spoilers=+e.target.value/100;$('spoilerText').textContent=e.target.value+'% • '+(S.spoilerArmed?'ARMED':'SAFE')};
+$('spoiler').onchange=e=>setSpoilers(+e.target.value);
+document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>setSpoilers(+b.dataset.sp));
+$('spDown').onclick=()=>setSpoilers(0);
+$('armBtn').onclick=()=>setSpoilerArm(true);$('disarmBtn').onclick=()=>setSpoilerArm(false);
+
+let rudderReturn;
+$('rudder').oninput=e=>{S.rudder=+e.target.value/100;clearTimeout(rudderReturn)};
+function returnRudder(){
+ clearInterval(rudderReturn);
+ rudderReturn=setInterval(()=>{
+  S.rudder*=.68;
+  if(Math.abs(S.rudder)<.01){S.rudder=0;clearInterval(rudderReturn)}
+  $('rudder').value=Math.round(S.rudder*100);
+ },16)
+}
+$('rudder').addEventListener('pointerup',returnRudder);
+$('rudder').addEventListener('touchend',returnRudder,{passive:true});
+
+$('bothBrake').addEventListener('pointerdown',()=>{brakeLCtl.set(1);brakeRCtl.set(1);vibrate(15)});
+$('bothBrake').addEventListener('pointerup',()=>{brakeLCtl.set(0);brakeRCtl.set(0)});
+$('bothBrake').addEventListener('pointercancel',()=>{brakeLCtl.set(0);brakeRCtl.set(0)});
+$('parkBtn').onclick=e=>{
+ S.parking=!S.parking;e.target.classList.toggle('active',S.parking);
+ e.target.innerHTML=S.parking?'PARKING<br>ON':'PARKING<br>BRAKE';
+ sendCommand('PARKING_BRAKE_SET',S.parking?1:0);
+};
+
+$('settingsBtn').onclick=()=>$('settings').classList.add('open');
+$('closeSettings').onclick=()=>{$('settings').classList.remove('open');S.smoothing=clamp(+$('smooth').value||.22,.05,1);startSender()};
+$('connectBtn').onclick=connectWS;$('disconnectBtn').onclick=disconnectWS;
+$('testBtn').onclick=()=>sendRaw({type:'test',message:'hello from phone',ts:Date.now()});
+$('fullBtn').onclick=async()=>{
+ try{
+  if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+  else await document.exitFullscreen();
+ }catch{}
+ try{ await screen.orientation?.lock?.('landscape'); }catch{}
+};
+
+$('settings').addEventListener('pointerdown',e=>{if(e.target===$('settings'))$('settings').classList.remove('open')});
+
+const saved=localStorage.getItem('msfs_ws_url');if(saved)$('wsUrl').value=saved;
+if(!window.isSecureContext){
+ $('secureWarn').style.display='block';
+ $('secureWarn').textContent='Aviso: esta página não está em contexto seguro. Alguns navegadores bloqueiam acelerômetro/giroscópio fora de HTTPS. Se o sensor não liberar, abra o HTML em um navegador que permita sensores locais ou hospede a página em HTTPS.';
+}
+startSender();
+log('Painel pronto. Configure a conexão com o PC.');
+</script>
 </body>
 </html>
